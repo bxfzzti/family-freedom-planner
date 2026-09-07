@@ -1,0 +1,25 @@
+{
+  "family_state": {
+    "adult_ages": [
+      38,
+      36
+    ],
+    "children_ages": [
+      3,
+      1
+    ],
+    "stable_household_income_annual": 630000,
+    "high_risk_income_annual": 500000,
+    "annual_spend": 180000,
+    "financial_assets": 1000000,
+    "primary_home_value": 3500000,
+    "primary_home_debt": 1000000,
+    "career_deadline_year": 2030
+  },
+  "source_tags": {
+    "stable_household_income_annual": "USER_ESTIMATE",
+    "annual_spend": "USER_ESTIMATE",
+    "financial_assets": "USER_ESTIMATE",
+    "primary_home_value": "USER_ESTIMATE"
+  }
+}

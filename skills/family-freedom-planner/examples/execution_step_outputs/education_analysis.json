@@ -1,0 +1,21 @@
+{
+  "education_scenarios": {
+    "BASE": {
+      "annual": 60000
+    },
+    "MID": {
+      "annual": 90000
+    },
+    "HIGH": {
+      "annual": 140000
+    }
+  },
+  "peak_years": [
+    2030,
+    2031,
+    2032
+  ],
+  "assumptions": [
+    "public-school-oriented scenarios"
+  ]
+}

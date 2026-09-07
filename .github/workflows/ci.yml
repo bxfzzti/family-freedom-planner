@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit tests
+        run: |
+          python -m unittest discover -s skills/family-freedom-planner/tests -p 'test_*.py'
+      - name: Validate benchmark
+        run: |
+          python skills/family-freedom-planner/scripts/validate_benchmark.py \
+            skills/family-freedom-planner/evals/benchmark_cases.json

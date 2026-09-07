@@ -1,0 +1,28 @@
+{
+  "selected_topics": [
+    "HOUSING_EXISTING",
+    "EDUCATION",
+    "CAREER"
+  ],
+  "known_facts": {
+    "adult_ages": [
+      38,
+      36
+    ],
+    "children_ages": [
+      3,
+      1
+    ],
+    "stable_household_income_annual": 630000,
+    "annual_spend": 180000,
+    "financial_assets": 1000000,
+    "primary_home_value": 3500000,
+    "primary_home_debt": 1000000,
+    "high_income_horizon_years": 4
+  },
+  "missing_fields": [
+    "target_home_budget",
+    "monthly_rent",
+    "target_school_area"
+  ]
+}

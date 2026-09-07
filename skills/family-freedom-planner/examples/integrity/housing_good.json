@@ -1,0 +1,12 @@
+{
+  "pre_purchase_liquid_assets": 4000000,
+  "cash_outlay": 2400000,
+  "sale_net_inflow": 0,
+  "post_purchase_liquid_assets": 1600000,
+  "old_home_price": 3500000,
+  "target_home_price": 5000000,
+  "replacement_spread": 1500000,
+  "final_home_non_sellable": true,
+  "final_home_equity_counted_as_portable": false,
+  "transaction_costs": 400000
+}

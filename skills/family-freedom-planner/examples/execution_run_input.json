@@ -1,0 +1,26 @@
+{
+  "run_id": "demo-user-housing-career",
+  "user_text": "我38岁，伴侣36岁；我税后年收入大概50万，伴侣13万；两个孩子3岁和1岁；家庭一年花18万左右；现金和金融资产100万；房子值350万，还欠100万；我觉得现在高薪还能持续4年；最纠结的是要不要卖房租两年再换学区改善房。",
+  "selected_topics": [
+    "HOUSING_EXISTING",
+    "EDUCATION",
+    "CAREER"
+  ],
+  "requires_external_facts": true,
+  "known_context": {
+    "adult_ages": [
+      38,
+      36
+    ],
+    "children_ages": [
+      3,
+      1
+    ],
+    "stable_household_income_annual": 630000,
+    "annual_spend": 180000,
+    "financial_assets": 1000000,
+    "primary_home_value": 3500000,
+    "primary_home_debt": 1000000,
+    "high_income_horizon_years": 4
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": "0.9",
+  "as_of": "2026-09",
+  "household": {
+    "adult_ages": [
+      38,
+      36
+    ],
+    "children_ages": [
+      3,
+      1
+    ]
+  },
+  "income": {
+    "stable_household_income_annual": 630000,
+    "high_risk_income_annual": 500000,
+    "high_income_deadline": "2030"
+  },
+  "expenses": {
+    "annual_household_spend": 180000
+  },
+  "assets": {
+    "cash_and_financial_assets": 1000000
+  },
+  "housing": {
+    "primary_home_value": 3500000,
+    "primary_home_debt": 1000000,
+    "target_home_budget": 5000000
+  },
+  "goals": [
+    "2030前解决学区与改善住房",
+    "逐步降低高薪依赖"
+  ],
+  "assumptions": [],
+  "open_questions": [],
+  "decision_journal": []
+}

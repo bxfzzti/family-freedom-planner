@@ -1,0 +1,17 @@
+{
+  "deadlines": [
+    {
+      "type": "CAREER_DEADLINE",
+      "year": 2030
+    },
+    {
+      "type": "EDUCATION_DEADLINE",
+      "year": 2030
+    },
+    {
+      "type": "HOUSING_DECISION",
+      "year": 2028
+    }
+  ],
+  "deadline_collision": true
+}

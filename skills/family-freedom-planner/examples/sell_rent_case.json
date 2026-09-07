@@ -1,0 +1,10 @@
+{
+  "current_home_sale_price": 3500000,
+  "current_home_debt": 1000000,
+  "transaction_costs": 0,
+  "monthly_rent": 6750,
+  "wait_years": 2,
+  "low_risk_return": 0.02,
+  "current_home_loan_rate": 0.0235,
+  "moving_and_other_friction": 30000
+}

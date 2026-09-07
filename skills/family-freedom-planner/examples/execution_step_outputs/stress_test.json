@@ -1,0 +1,16 @@
+{
+  "scenarios": {
+    "NORMAL": {
+      "summary": "income and financing assumptions hold"
+    },
+    "STRESS": {
+      "summary": "income down, housing spread worsens"
+    },
+    "SEVERE": {
+      "summary": "high income ends early"
+    }
+  },
+  "material_failures": [
+    "target-school eligibility must be verified before execution"
+  ]
+}

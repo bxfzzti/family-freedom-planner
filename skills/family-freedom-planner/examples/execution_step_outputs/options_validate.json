@@ -1,0 +1,18 @@
+{
+  "all_options_validated": true,
+  "critical_errors": [],
+  "option_checks": [
+    {
+      "id": "A",
+      "pass": true
+    },
+    {
+      "id": "B",
+      "pass": true
+    },
+    {
+      "id": "C",
+      "pass": true
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "principal_due_or_current_balance": 3000000,
+  "confirmed_refinance_amount": 1800000,
+  "safely_available_for_debt": 800000,
+  "refinance_gap": 400000,
+  "scenario": "REDUCED_REFINANCE",
+  "compliance_status": "REQUIRES_VERIFICATION",
+  "treated_as_confirmed_executable": false
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Family Freedom Planner Decision Result",
+  "type": "object",
+  "required": [
+    "status"
+  ],
+  "properties": {
+    "status": {
+      "enum": [
+        "NEED_INPUT",
+        "READY",
+        "COMPLETE"
+      ]
+    },
+    "one_line_diagnosis": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "missing_critical_input": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "deadlines": {
+      "type": "array"
+    },
+    "derived_metrics": {
+      "type": "object"
+    },
+    "freedom_dimensions": {
+      "type": "object"
+    },
+    "options": {
+      "type": "array"
+    },
+    "recommendation": {
+      "type": "object"
+    },
+    "failure_triggers": {
+      "type": "array"
+    },
+    "next_actions": {
+      "type": "array"
+    },
+    "replan_triggers": {
+      "type": "array"
+    },
+    "couple_questions": {
+      "type": "array"
+    }
+  }
+}

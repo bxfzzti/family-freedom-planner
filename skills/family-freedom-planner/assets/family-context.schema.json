@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Family Freedom Planner Context Capsule",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "as_of"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "as_of": {
+      "type": "string"
+    },
+    "household": {
+      "type": "object"
+    },
+    "income": {
+      "type": "object"
+    },
+    "expenses": {
+      "type": "object"
+    },
+    "assets": {
+      "type": "object"
+    },
+    "housing": {
+      "type": "object"
+    },
+    "debts": {
+      "type": "object"
+    },
+    "career": {
+      "type": "object"
+    },
+    "education": {
+      "type": "object"
+    },
+    "preferences": {
+      "type": "object"
+    },
+    "goals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assumptions": {
+      "type": "array"
+    },
+    "open_questions": {
+      "type": "array"
+    },
+    "decision_journal": {
+      "type": "array"
+    }
+  },
+  "additionalProperties": true
+}

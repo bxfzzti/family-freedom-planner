@@ -1,0 +1,77 @@
+{
+  "version": "1.2.0",
+  "skill_lines": 310,
+  "unit_tests": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 785, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 720, in _warm_feature_flows\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 704, in _warm_collaboration_flows\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/generated/interface/models.py\", line 32317, in hydrate_crdt_from_proto\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/remote.py\", line 749, in __call__\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n.........................................\n----------------------------------------------------------------------\nRan 41 tests in 0.022s\n\nOK",
+  "benchmark_validation": {
+    "case_count": 38,
+    "unique_ids": 38,
+    "unique_risk_tags": 53,
+    "counterfactual_cases": 5,
+    "invariance_cases": 3,
+    "errors": [],
+    "status": "PASS"
+  },
+  "integrity_positive_control": {
+    "domain": "housing",
+    "cross_checks": [
+      {
+        "name": "post_purchase_liquidity",
+        "pass": true,
+        "relative_diff": 0.0,
+        "expected": 1600000.0,
+        "actual": 1600000,
+        "tolerance": 0.005
+      },
+      {
+        "name": "replacement_spread",
+        "pass": true,
+        "relative_diff": 0.0,
+        "expected": 1500000.0,
+        "actual": 1500000,
+        "tolerance": 0.005
+      }
+    ],
+    "integrity": {
+      "status": "PASS",
+      "confidence": "HIGH",
+      "issues": []
+    }
+  },
+  "integrity_negative_control": {
+    "domain": "housing",
+    "cross_checks": [
+      {
+        "name": "post_purchase_liquidity",
+        "pass": true,
+        "relative_diff": 0.0,
+        "expected": 1600000.0,
+        "actual": 1600000,
+        "tolerance": 0.005
+      },
+      {
+        "name": "replacement_spread",
+        "pass": false,
+        "relative_diff": 0.16666666666666666,
+        "expected": 1500000.0,
+        "actual": 1800000,
+        "tolerance": 0.005
+      }
+    ],
+    "integrity": {
+      "status": "FAIL",
+      "confidence": "LOW",
+      "issues": [
+        "cross-check failed: replacement_spread"
+      ]
+    }
+  },
+  "dependency_invalidation_demo": [
+    "housing_freedom",
+    "options",
+    "post_purchase_liquid_assets",
+    "recommendation",
+    "replacement_spread",
+    "stress_test"
+  ],
+  "status": "PASS"
+}

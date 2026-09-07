@@ -1,0 +1,14 @@
+{
+  "mode": "SELL_RENT_THEN_UPGRADE",
+  "results": {
+    "target_home_considered": true,
+    "replacement_spread_checked": true,
+    "current_spread": 1500000,
+    "sell_rent_wait_cost": 44000,
+    "breakeven_old_home_decline_pct": 0.0126
+  },
+  "assumptions": [
+    "target_home_budget=5000000",
+    "rent=6750/month"
+  ]
+}

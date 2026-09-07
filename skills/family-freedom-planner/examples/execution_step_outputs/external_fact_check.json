@@ -1,0 +1,10 @@
+{
+  "facts": [
+    {
+      "name": "school_policy",
+      "value": "not_verified_in_demo"
+    }
+  ],
+  "verification_status": "UNVERIFIED",
+  "conditionalized_if_unverified": true
+}

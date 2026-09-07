@@ -1,0 +1,8 @@
+{
+  "status": "PARTIAL",
+  "missing_p0": [
+    "target_home_budget",
+    "monthly_rent"
+  ],
+  "conflicts": []
+}

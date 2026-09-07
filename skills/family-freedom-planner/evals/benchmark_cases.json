@@ -1,0 +1,843 @@
+{
+  "version": "1.0",
+  "case_count": 38,
+  "cases": [
+    {
+      "id": "S01_first_home_single_income",
+      "kind": "STANDARD",
+      "prompt": "我32岁，单身，税后年收入28万，手里90万现金，一直租房，想知道可以买多贵的第一套房。",
+      "expected_modules": [
+        "HOUSING_FIRST_BUY"
+      ],
+      "must": [
+        "使用首次购房逻辑",
+        "计算买后流动资产",
+        "不默认必须买房"
+      ],
+      "must_not": [
+        "询问现有住房市值",
+        "把银行可贷额度当安全预算"
+      ],
+      "risk_tags": [
+        "FIRST_HOME",
+        "SINGLE_INCOME",
+        "LIQUIDITY"
+      ],
+      "difficulty": "BASIC"
+    },
+    {
+      "id": "S02_couple_no_children_first_home",
+      "kind": "STANDARD",
+      "prompt": "我们夫妻33和31岁，没有孩子，家庭税后55万，现金150万，租房每月6500，考虑首套房。",
+      "expected_modules": [
+        "HOUSING_FIRST_BUY"
+      ],
+      "must": [
+        "比较买房与继续租房的现金流",
+        "保留未来选择权"
+      ],
+      "must_not": [
+        "默认未来一定要孩子",
+        "强制加入教育预算"
+      ],
+      "risk_tags": [
+        "FIRST_HOME",
+        "NO_CHILDREN",
+        "LIQUIDITY"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S03_two_children_upgrade",
+      "kind": "STANDARD",
+      "prompt": "我38岁，伴侣36岁，两个孩子，家庭税后63万，金融资产100万，房子350万欠100万，想换500万学区改善房。",
+      "expected_modules": [
+        "HOUSING_EXISTING",
+        "EDUCATION"
+      ],
+      "must": [
+        "看买后金融资产",
+        "看置换价差",
+        "识别教育Deadline"
+      ],
+      "must_not": [
+        "只看旧房涨跌",
+        "只说500万买得起"
+      ],
+      "risk_tags": [
+        "TWO_CHILDREN",
+        "EDUCATION_DEADLINE",
+        "HOUSING_UPGRADE"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S04_high_income_deadline",
+      "kind": "STANDARD",
+      "prompt": "我39岁在大厂，税后70万，老婆20万，家里一年花25万，想41岁以后不干这么累了。",
+      "expected_modules": [
+        "CAREER"
+      ],
+      "must": [
+        "询问/利用金融资产和负债",
+        "区分离开高薪与完全退休",
+        "建立过渡收入"
+      ],
+      "must_not": [
+        "只套25倍支出",
+        "默认70万持续到退休"
+      ],
+      "risk_tags": [
+        "HIGH_INCOME_DEPENDENCY",
+        "CAREER_DEADLINE"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S05_spouse_break",
+      "kind": "STANDARD",
+      "prompt": "老婆明年准备辞职带娃，她税后15万，我税后35万，家里一年花22万，我们能撑住吗？",
+      "expected_modules": [
+        "SPOUSE_BREAK"
+      ],
+      "must": [
+        "重算单收入现金流",
+        "考虑重返职场/脱产期限",
+        "不贬低照护劳动"
+      ],
+      "must_not": [
+        "强制进入换房模块",
+        "把脱产等同于没有贡献"
+      ],
+      "risk_tags": [
+        "SPOUSE_BREAK",
+        "SINGLE_INCOME",
+        "CHILDCARE"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S06_refinance_risk",
+      "kind": "STANDARD",
+      "prompt": "我们准备买房，银行给的抵押贷利率2.5%，名义本金300万，三年一续，月供很低，是不是比普通房贷划算？",
+      "expected_modules": [
+        "FINANCING",
+        "HOUSING_EXISTING"
+      ],
+      "must": [
+        "检查名义本金",
+        "测试额度下降和无法续贷",
+        "提醒用途合规"
+      ],
+      "must_not": [
+        "只比较利率",
+        "用低月供证明安全"
+      ],
+      "risk_tags": [
+        "REFINANCE_RISK",
+        "HOUSING_FINANCE"
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "id": "S07_debt_heavy_low_assets",
+      "kind": "STANDARD",
+      "prompt": "家庭税后45万，一年花28万，房子400万但贷款330万，手里只有20万现金，我想换工作。",
+      "expected_modules": [
+        "CAREER",
+        "FINANCING"
+      ],
+      "must": [
+        "识别低流动性和高负债",
+        "计算Runway",
+        "谨慎评估换工作"
+      ],
+      "must_not": [
+        "因为房子400万就说资产很好"
+      ],
+      "risk_tags": [
+        "DEBT_HEAVY",
+        "LOW_LIQUIDITY",
+        "CAREER_CHANGE"
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "id": "S08_high_networth_low_liquidity",
+      "kind": "STANDARD",
+      "prompt": "我们净资产大概700万，但600多万都在自住房里，现金只有30万，家庭年支出30万，算财务自由了吗？",
+      "expected_modules": [
+        "GENERAL"
+      ],
+      "must": [
+        "区分净资产与可迁移资产",
+        "指出房产锁定率",
+        "算Runway"
+      ],
+      "must_not": [
+        "因为700万净资产直接判断自由"
+      ],
+      "risk_tags": [
+        "HIGH_NET_WORTH",
+        "LOW_LIQUIDITY",
+        "PROPERTY_LOCK"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S09_no_home_career_change",
+      "kind": "STANDARD",
+      "prompt": "我们没房，夫妻税后合计45万，现金200万，想从一线城市回老家小城，收入可能降到20万。",
+      "expected_modules": [
+        "RELOCATION",
+        "CAREER"
+      ],
+      "must": [
+        "比较迁移前后收入与支出",
+        "关注医疗/教育/工作机会",
+        "不默认必须买房"
+      ],
+      "must_not": [
+        "把回小城自动等同低质量生活"
+      ],
+      "risk_tags": [
+        "RELOCATION",
+        "INCOME_DROP",
+        "NO_HOME"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S10_parent_care",
+      "kind": "STANDARD",
+      "prompt": "我36岁，独生子，父母未来几年医疗和养老可能每年要10万左右，我还有一个孩子，家庭税后50万。",
+      "expected_modules": [
+        "PARENT_CARE",
+        "EDUCATION"
+      ],
+      "must": [
+        "把赡养加入强制/半强制现金流",
+        "识别教育与养老Deadline重叠"
+      ],
+      "must_not": [
+        "忽略父母支出",
+        "给出医疗诊断"
+      ],
+      "risk_tags": [
+        "PARENT_CARE",
+        "EDUCATION",
+        "MULTIPLE_DEADLINES"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S11_investing_novice_home_goal",
+      "kind": "STANDARD",
+      "prompt": "我们有180万金融资产，其中120万在股票基金里，但两年后准备买房，我投资其实不太懂。",
+      "expected_modules": [
+        "INVESTING",
+        "HOUSING_FIRST_BUY"
+      ],
+      "must": [
+        "识别两年内目标资金不宜依赖高波动收益",
+        "区分短期目标资金和长期投资"
+      ],
+      "must_not": [
+        "鼓励用股票收益补首付缺口"
+      ],
+      "risk_tags": [
+        "INVESTING_NOVICE",
+        "SHORT_TERM_CAPEX",
+        "FIRST_HOME"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S12_self_employed_irregular_income",
+      "kind": "STANDARD",
+      "prompt": "我做生意，过去三年税后收入分别是80万、35万、60万，老婆不上班，两个孩子，想买450万的房。",
+      "expected_modules": [
+        "HOUSING_FIRST_BUY",
+        "CAREER"
+      ],
+      "must": [
+        "使用保守稳定收入而非最好年份",
+        "做收入波动压力测试",
+        "看买后流动性"
+      ],
+      "must_not": [
+        "按80万当稳定收入"
+      ],
+      "risk_tags": [
+        "INCOME_VOLATILITY",
+        "SPOUSE_BREAK",
+        "TWO_CHILDREN",
+        "HOUSING"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S13_single_parent",
+      "kind": "STANDARD",
+      "prompt": "我一个人带孩子，税后30万，年支出18万，现金70万，没有房，想知道该不该买。",
+      "expected_modules": [
+        "HOUSING_FIRST_BUY",
+        "EDUCATION"
+      ],
+      "must": [
+        "采用更高流动性安全边际",
+        "考虑单收入风险",
+        "不评价家庭结构"
+      ],
+      "must_not": [
+        "默认存在伴侣收入"
+      ],
+      "risk_tags": [
+        "SINGLE_PARENT",
+        "SINGLE_INCOME",
+        "FIRST_HOME"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S14_no_children_career_freedom",
+      "kind": "STANDARD",
+      "prompt": "我们夫妻不要孩子，税后合计70万，年支出22万，金融资产300万，想在42岁后都换轻松工作。",
+      "expected_modules": [
+        "CAREER"
+      ],
+      "must": [
+        "不强制加入教育成本",
+        "计算过渡期收入与Runway",
+        "保留生活质量偏好"
+      ],
+      "must_not": [
+        "默认未来会生孩子"
+      ],
+      "risk_tags": [
+        "NO_CHILDREN",
+        "CAREER_TRANSITION",
+        "HIGH_SAVINGS"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S15_education_high_input",
+      "kind": "STANDARD",
+      "prompt": "两个孩子，一个小学一个幼儿园，我们倾向国际教育，家庭税后100万，想同时换700万的房。",
+      "expected_modules": [
+        "EDUCATION",
+        "HOUSING_EXISTING"
+      ],
+      "must": [
+        "使用高教育投入情景",
+        "识别支出重叠峰值",
+        "做买后现金流压力测试"
+      ],
+      "must_not": [
+        "用公办教育成本估算",
+        "只看当前一年教育费"
+      ],
+      "risk_tags": [
+        "HIGH_EDUCATION_COST",
+        "HOUSING_UPGRADE",
+        "MULTIPLE_DEADLINES"
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "id": "S16_mortgage_prepayment",
+      "kind": "STANDARD",
+      "prompt": "房贷还剩150万，利率3.6%，手里有180万现金，我该不该一次性还掉？",
+      "expected_modules": [
+        "FINANCING"
+      ],
+      "must": [
+        "比较还贷后流动性与利息节省",
+        "保留应急金",
+        "结合未来大额目标"
+      ],
+      "must_not": [
+        "只因为3.6%就建议全还",
+        "忽略未来现金需求"
+      ],
+      "risk_tags": [
+        "PREPAYMENT",
+        "LIQUIDITY"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S17_old_home_down_target_flat",
+      "kind": "STANDARD",
+      "prompt": "旧房去年350万，现在只能卖315万，但目标学区房还是500万，我是不是应该等等旧房反弹？",
+      "expected_modules": [
+        "HOUSING_EXISTING",
+        "EDUCATION"
+      ],
+      "must": [
+        "关注置换价差恶化",
+        "不预测反弹",
+        "比较等待成本和Deadline"
+      ],
+      "must_not": [
+        "断言一定反弹",
+        "只看旧房亏损"
+      ],
+      "risk_tags": [
+        "REPLACEMENT_SPREAD",
+        "EDUCATION_DEADLINE"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S18_old_and_target_both_down",
+      "kind": "STANDARD",
+      "prompt": "旧房350跌到315，目标房500也跌到450，我们本来就准备换房，这算坏事吗？",
+      "expected_modules": [
+        "HOUSING_EXISTING"
+      ],
+      "must": [
+        "比较置换价差",
+        "指出同步下跌可能有利于置换",
+        "不要只看账面亏损"
+      ],
+      "must_not": [
+        "因为旧房跌10%就判断更糟"
+      ],
+      "risk_tags": [
+        "REPLACEMENT_SPREAD",
+        "COUNTERINTUITIVE"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S19_job_loss_now",
+      "kind": "STANDARD",
+      "prompt": "我上个月被裁了，原来税后50万，伴侣12万，两个孩子，现金120万，房贷每月7000，我们接下来怎么安排？",
+      "expected_modules": [
+        "CAREER",
+        "FINANCING"
+      ],
+      "must": [
+        "先算Runway和强制现金流",
+        "区分短期止血与长期规划",
+        "不要求立即找同薪工作"
+      ],
+      "must_not": [
+        "用过去50万收入做当前稳定收入"
+      ],
+      "risk_tags": [
+        "JOB_LOSS",
+        "TWO_CHILDREN",
+        "CASHFLOW_STRESS"
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "id": "S20_relocation_with_home",
+      "kind": "STANDARD",
+      "prompt": "我们在杭州有套350万的房，想几年后回县城生活，县城有房不用买，但担心医疗和孩子教育。",
+      "expected_modules": [
+        "RELOCATION",
+        "EDUCATION"
+      ],
+      "must": [
+        "把医疗/教育作为迁移约束",
+        "不默认卖杭州房",
+        "讨论收入与地理脱钩"
+      ],
+      "must_not": [
+        "把县城生活自动判断为更好或更差"
+      ],
+      "risk_tags": [
+        "RELOCATION",
+        "EDUCATION",
+        "HEALTH_ACCESS"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S21_large_cash_low_income",
+      "kind": "STANDARD",
+      "prompt": "家庭税后只有25万，但现金和存款有500万，没有房，也没孩子，我们是不是可以买600万的房？",
+      "expected_modules": [
+        "HOUSING_FIRST_BUY"
+      ],
+      "must": [
+        "看买后现金流和机会成本",
+        "区分资产能力与持续现金流能力"
+      ],
+      "must_not": [
+        "因为500万现金就说600万房没问题"
+      ],
+      "risk_tags": [
+        "HIGH_ASSETS_LOW_INCOME",
+        "HOUSING"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S22_negative_networth",
+      "kind": "STANDARD",
+      "prompt": "我们没有房，信用贷和其他债务加起来80万，现金15万，家庭税后35万，一年花25万，想明年买房。",
+      "expected_modules": [
+        "HOUSING_FIRST_BUY",
+        "FINANCING"
+      ],
+      "must": [
+        "先处理高负债与流动性",
+        "计算净资产/现金流",
+        "买房计划应谨慎"
+      ],
+      "must_not": [
+        "鼓励叠加更多高杠杆"
+      ],
+      "risk_tags": [
+        "NEGATIVE_NET_WORTH",
+        "DEBT_HEAVY",
+        "FIRST_HOME"
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "id": "S23_bonus_not_stable",
+      "kind": "STANDARD",
+      "prompt": "我去年税后收入90万，但里面40万是一次性奖金，平时稳定税后只有50万，买房应该按哪个算？",
+      "expected_modules": [
+        "HOUSING_FIRST_BUY",
+        "CAREER"
+      ],
+      "must": [
+        "把一次性奖金与稳定收入分开",
+        "用保守稳定收入做月供压力测试"
+      ],
+      "must_not": [
+        "把90万全部当稳定收入"
+      ],
+      "risk_tags": [
+        "BONUS_VOLATILITY",
+        "HOUSING"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S24_two_deadlines_same_year",
+      "kind": "STANDARD",
+      "prompt": "2028年孩子要上小学，我的合同也可能到期，我们还想那年换房。",
+      "expected_modules": [
+        "EDUCATION",
+        "CAREER",
+        "HOUSING_EXISTING"
+      ],
+      "must": [
+        "识别Deadline Collision",
+        "建议减少同年不可逆动作",
+        "优先确定性最高的Deadline"
+      ],
+      "must_not": [
+        "把三件事都安排在同一年且不提示风险"
+      ],
+      "risk_tags": [
+        "MULTIPLE_DEADLINES",
+        "EDUCATION_DEADLINE",
+        "CAREER_DEADLINE"
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "id": "S25_partner_disagreement",
+      "kind": "STANDARD",
+      "prompt": "我想卖房租两年提高流动性，我老婆觉得租房太折腾，谁更合理？",
+      "expected_modules": [
+        "HOUSING_EXISTING"
+      ],
+      "must": [
+        "区分数学与价值偏好",
+        "指出双方权重差异",
+        "给折中条件"
+      ],
+      "must_not": [
+        "替一方裁决",
+        "贬低居住体验"
+      ],
+      "risk_tags": [
+        "COUPLE_CONFLICT",
+        "HOUSING"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S26_missing_data",
+      "kind": "STANDARD",
+      "prompt": "我想40岁退休，大概有些存款，家里也有房，你帮我看看。",
+      "expected_modules": [
+        "CAREER"
+      ],
+      "must": [
+        "只追问方向性关键变量",
+        "允许先给区间/框架"
+      ],
+      "must_not": [
+        "要求一次补齐全部资产负债表"
+      ],
+      "risk_tags": [
+        "MISSING_DATA",
+        "CAREER"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S27_unknown_education_route",
+      "kind": "STANDARD",
+      "prompt": "孩子现在两岁，我们还不知道以后走公办还是国际，但想先做长期规划。",
+      "expected_modules": [
+        "EDUCATION"
+      ],
+      "must": [
+        "使用多路线情景",
+        "不替用户选教育路线",
+        "给Replan节点"
+      ],
+      "must_not": [
+        "默认国际",
+        "默认公办"
+      ],
+      "risk_tags": [
+        "EDUCATION_UNCERTAINTY"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S28_one_home_not_sellable",
+      "kind": "STANDARD",
+      "prompt": "我们准备买一套长期住到孩子大学的房子，买了以后原则上不卖，这种情况下预算该怎么定？",
+      "expected_modules": [
+        "HOUSING_EXISTING"
+      ],
+      "must": [
+        "提高流动性要求",
+        "不把终局房作为未来现金兜底",
+        "强调买后金融资产"
+      ],
+      "must_not": [
+        "把未来卖房当默认Plan B"
+      ],
+      "risk_tags": [
+        "NON_SELLABLE_HOME",
+        "PROPERTY_LOCK"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S29_interest_rate_jump",
+      "kind": "STANDARD",
+      "prompt": "我们的贷款现在2.5%，但三年后可能变成4.5%，这对离职计划影响大吗？",
+      "expected_modules": [
+        "FINANCING",
+        "CAREER"
+      ],
+      "must": [
+        "重算年度住房现金流",
+        "比较转型后收入覆盖",
+        "给利率触发线"
+      ],
+      "must_not": [
+        "只说利率仍然不高"
+      ],
+      "risk_tags": [
+        "RATE_RISK",
+        "CAREER_TRANSITION"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "S30_side_income_verified",
+      "kind": "STANDARD",
+      "prompt": "我副业过去一年稳定做到15万，主业50万，家庭年支出20万，想两年后把主业降到20万。",
+      "expected_modules": [
+        "CAREER"
+      ],
+      "must": [
+        "把已验证副业计入过渡收入",
+        "重新评估职业自由度",
+        "仍做副业波动压力测试"
+      ],
+      "must_not": [
+        "把副业当0",
+        "把副业永久稳定化"
+      ],
+      "risk_tags": [
+        "SIDE_INCOME",
+        "CAREER_TRANSITION"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "C01_spouse_income_zero",
+      "kind": "COUNTERFACTUAL",
+      "prompt": "和之前一样，但伴侣确定从明年开始不再有13万年收入。",
+      "expected_modules": [
+        "SPOUSE_BREAK",
+        "CAREER"
+      ],
+      "must": [
+        "降低稳定家庭收入",
+        "重算Runway/职业自由度",
+        "说明旧结论变化"
+      ],
+      "must_not": [
+        "沿用旧收入不变"
+      ],
+      "risk_tags": [
+        "COUNTERFACTUAL",
+        "SPOUSE_BREAK"
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "id": "C02_target_home_cheaper",
+      "kind": "COUNTERFACTUAL",
+      "prompt": "和之前一样，但目标房预算从500万降到430万。",
+      "expected_modules": [
+        "HOUSING_EXISTING"
+      ],
+      "must": [
+        "重算买后流动资产",
+        "住房自由度应改善或不变",
+        "说明旧结论变化"
+      ],
+      "must_not": [
+        "完全忽略预算下降"
+      ],
+      "risk_tags": [
+        "COUNTERFACTUAL",
+        "HOUSING"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "C03_refi_cut",
+      "kind": "COUNTERFACTUAL",
+      "prompt": "原计划抵押融资300万，但银行明确最多只能续180万。",
+      "expected_modules": [
+        "FINANCING"
+      ],
+      "must": [
+        "计算至少120万融资缺口",
+        "降低再融资安全度",
+        "触发备选融资方案"
+      ],
+      "must_not": [
+        "继续按300万可续计算"
+      ],
+      "risk_tags": [
+        "COUNTERFACTUAL",
+        "REFINANCE_RISK"
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "id": "C04_side_income_up",
+      "kind": "COUNTERFACTUAL",
+      "prompt": "副业从3万提高到15万，而且连续12个月稳定。",
+      "expected_modules": [
+        "CAREER"
+      ],
+      "must": [
+        "提高可验证过渡收入",
+        "职业自由度应改善",
+        "说明仍需压力测试"
+      ],
+      "must_not": [
+        "完全不调整职业判断"
+      ],
+      "risk_tags": [
+        "COUNTERFACTUAL",
+        "SIDE_INCOME"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "C05_deadline_earlier",
+      "kind": "COUNTERFACTUAL",
+      "prompt": "原来以为高薪还能稳定4年，现在公司变化后可能只剩1年。",
+      "expected_modules": [
+        "CAREER"
+      ],
+      "must": [
+        "提前职业Deadline",
+        "提高流动性优先级",
+        "重新排序住房等不可逆决策"
+      ],
+      "must_not": [
+        "仍按4年高薪储蓄计算"
+      ],
+      "risk_tags": [
+        "COUNTERFACTUAL",
+        "CAREER_DEADLINE"
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "id": "I01_emotional_wording",
+      "kind": "INVARIANCE",
+      "prompt": "我现在特别焦虑，朋友都买房了。我32岁，单身，税后28万，现金90万，一直租房，想知道可以买多贵的第一套房。",
+      "expected_modules": [
+        "HOUSING_FIRST_BUY"
+      ],
+      "must": [
+        "财务判断应与相同数字的中性版本基本一致",
+        "可简化表达降低焦虑"
+      ],
+      "must_not": [
+        "因为焦虑而提高或降低安全预算"
+      ],
+      "risk_tags": [
+        "INVARIANCE",
+        "EMOTION"
+      ],
+      "difficulty": "INTERMEDIATE"
+    },
+    {
+      "id": "I02_number_format",
+      "kind": "INVARIANCE",
+      "prompt": "家庭税后年收入630,000元，年支出180,000元，金融资产1,000,000元，房子3,500,000元，贷款1,000,000元，考虑换房。",
+      "expected_modules": [
+        "HOUSING_EXISTING"
+      ],
+      "must": [
+        "正确识别金额与万单位等价",
+        "不因数字格式改变结论"
+      ],
+      "must_not": [
+        "把630000误读成63万以外的数量级"
+      ],
+      "risk_tags": [
+        "INVARIANCE",
+        "NUMBER_FORMAT"
+      ],
+      "difficulty": "BASIC"
+    },
+    {
+      "id": "I03_reordered_prompt",
+      "kind": "INVARIANCE",
+      "prompt": "最纠结的是换房。我有100万金融资产，贷款100万，房子350万；家庭一年花18万，夫妻税后合计63万，两个孩子。",
+      "expected_modules": [
+        "HOUSING_EXISTING"
+      ],
+      "must": [
+        "从乱序信息正确抽取家庭状态",
+        "不要求用户按模板顺序重写"
+      ],
+      "must_not": [
+        "因为顺序混乱就重新发完整问诊"
+      ],
+      "risk_tags": [
+        "INVARIANCE",
+        "ORDER"
+      ],
+      "difficulty": "INTERMEDIATE"
+    }
+  ]
+}

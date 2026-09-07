@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Family Freedom Planner Result Envelope",
+  "type": "object",
+  "required": [
+    "data",
+    "provenance",
+    "cross_checks",
+    "integrity"
+  ],
+  "properties": {
+    "data": {
+      "type": "object"
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source_type",
+          "source_id",
+          "confidence",
+          "fields"
+        ],
+        "properties": {
+          "source_type": {
+            "enum": [
+              "USER_EXACT",
+              "USER_ESTIMATE",
+              "EXTERNAL_PRIMARY",
+              "EXTERNAL_SECONDARY",
+              "MODEL_ASSUMPTION",
+              "DERIVED_REFERENCE_ENGINE",
+              "DERIVED_SECONDARY_CHECK"
+            ]
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "as_of": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "confidence": {
+            "enum": [
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "cross_checks": {
+      "type": "array"
+    },
+    "integrity": {
+      "type": "object",
+      "required": [
+        "status",
+        "confidence",
+        "issues"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "PASS",
+            "WARN",
+            "FAIL"
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "HIGH",
+            "MEDIUM",
+            "LOW"
+          ]
+        },
+        "issues": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

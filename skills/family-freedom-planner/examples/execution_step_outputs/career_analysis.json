@@ -1,0 +1,21 @@
+{
+  "current_income_state": {
+    "household": 630000,
+    "high_risk": 500000
+  },
+  "transition_scenarios": [
+    {
+      "name": "current",
+      "income": 630000
+    },
+    {
+      "name": "transition",
+      "income": 280000
+    },
+    {
+      "name": "severe",
+      "income": 180000
+    }
+  ],
+  "career_deadline": 2030
+}

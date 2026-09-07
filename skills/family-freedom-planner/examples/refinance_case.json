@@ -1,0 +1,7 @@
+{
+  "principal_due_or_current_balance": 3000000,
+  "confirmed_refinance_amount": 1800000,
+  "low_risk_assets_available": 1600000,
+  "emergency_fund_floor": 500000,
+  "committed_24m_capex": 300000
+}

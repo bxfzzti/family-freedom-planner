@@ -1,0 +1,37 @@
+{
+  "as_of": "2026-09",
+  "income": {
+    "stable_annual": {
+      "adult_a_salary": 500000,
+      "adult_b_salary": 130000,
+      "side_income": 30000
+    },
+    "high_risk_annual": 500000
+  },
+  "expenses": {
+    "annual_total": 180000,
+    "annual_mandatory": 150000
+  },
+  "assets": {
+    "cash": 800000,
+    "low_risk_investments": 0,
+    "investments": 200000,
+    "other_liquid": 0,
+    "real_estate": [
+      {
+        "name": "current_home",
+        "market_value": 3500000,
+        "linked_debt_balance": 1000000,
+        "sellable_for_plan": true
+      }
+    ]
+  },
+  "debts": {
+    "items": [
+      {
+        "name": "current_home_financing",
+        "balance": 1000000
+      }
+    ]
+  }
+}

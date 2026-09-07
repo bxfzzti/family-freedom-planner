@@ -1,0 +1,47 @@
+{
+  "target_home_price": [
+    "replacement_spread",
+    "post_purchase_liquid_assets",
+    "housing_freedom",
+    "stress_test",
+    "options",
+    "recommendation"
+  ],
+  "old_home_price": [
+    "replacement_spread",
+    "sale_net_proceeds",
+    "housing_freedom",
+    "stress_test",
+    "options",
+    "recommendation"
+  ],
+  "financial_assets": [
+    "runway_months",
+    "post_purchase_liquid_assets",
+    "liquidity_freedom",
+    "stress_test",
+    "options",
+    "recommendation"
+  ],
+  "stable_household_income": [
+    "annual_surplus",
+    "high_income_dependency",
+    "career_freedom",
+    "stress_test",
+    "options",
+    "recommendation"
+  ],
+  "confirmed_refinance_amount": [
+    "refinance_gap",
+    "refinance_safety",
+    "stress_test",
+    "options",
+    "recommendation"
+  ],
+  "education_mid_case": [
+    "education_capacity",
+    "stress_test",
+    "options",
+    "recommendation"
+  ]
+}

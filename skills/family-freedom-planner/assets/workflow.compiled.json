@@ -1,0 +1,308 @@
+{
+  "version": "1.2.0",
+  "name": "family-freedom-planner-execution-control",
+  "principle": "fail_closed",
+  "gate_statuses": [
+    "PASS",
+    "CONDITIONAL_PASS",
+    "BLOCKED"
+  ],
+  "steps": [
+    {
+      "id": "INTAKE_ROUTE",
+      "requires": [],
+      "applicability": "always",
+      "required_output_keys": [
+        "selected_topics",
+        "known_facts",
+        "missing_fields"
+      ],
+      "validators": [
+        "validate_intake_route"
+      ]
+    },
+    {
+      "id": "STATE_BUILD",
+      "requires": [
+        "INTAKE_ROUTE"
+      ],
+      "applicability": "always",
+      "required_output_keys": [
+        "family_state",
+        "source_tags"
+      ],
+      "validators": [
+        "validate_state_build"
+      ]
+    },
+    {
+      "id": "INPUT_VALIDATE",
+      "requires": [
+        "STATE_BUILD"
+      ],
+      "applicability": "always",
+      "required_output_keys": [
+        "status",
+        "missing_p0",
+        "conflicts"
+      ],
+      "validators": [
+        "validate_input_validate"
+      ]
+    },
+    {
+      "id": "DEADLINE_IDENTIFY",
+      "requires": [
+        "INPUT_VALIDATE"
+      ],
+      "applicability": "always",
+      "required_output_keys": [
+        "deadlines",
+        "deadline_collision"
+      ],
+      "validators": [
+        "validate_deadlines"
+      ]
+    },
+    {
+      "id": "BASELINE_CALCULATE",
+      "requires": [
+        "INPUT_VALIDATE"
+      ],
+      "applicability": "always",
+      "required_output_keys": [
+        "derived_metrics",
+        "calculation_source"
+      ],
+      "validators": [
+        "validate_baseline"
+      ]
+    },
+    {
+      "id": "HOUSING_ANALYSIS",
+      "requires": [
+        "BASELINE_CALCULATE",
+        "DEADLINE_IDENTIFY"
+      ],
+      "applicability": "topic:HOUSING_EXISTING|HOUSING_FIRST_BUY",
+      "required_output_keys": [
+        "mode",
+        "results",
+        "assumptions"
+      ],
+      "validators": [
+        "validate_housing"
+      ]
+    },
+    {
+      "id": "EDUCATION_ANALYSIS",
+      "requires": [
+        "BASELINE_CALCULATE",
+        "DEADLINE_IDENTIFY"
+      ],
+      "applicability": "topic:EDUCATION",
+      "required_output_keys": [
+        "education_scenarios",
+        "peak_years",
+        "assumptions"
+      ],
+      "validators": [
+        "validate_education"
+      ]
+    },
+    {
+      "id": "CAREER_ANALYSIS",
+      "requires": [
+        "BASELINE_CALCULATE",
+        "DEADLINE_IDENTIFY"
+      ],
+      "applicability": "topic:CAREER|SPOUSE_BREAK",
+      "required_output_keys": [
+        "current_income_state",
+        "transition_scenarios",
+        "career_deadline"
+      ],
+      "validators": [
+        "validate_career"
+      ]
+    },
+    {
+      "id": "FINANCING_ANALYSIS",
+      "requires": [
+        "BASELINE_CALCULATE"
+      ],
+      "applicability": "topic:FINANCING",
+      "required_output_keys": [
+        "nominal_principal_checked",
+        "refinance_failure_tested",
+        "compliance_status",
+        "results"
+      ],
+      "validators": [
+        "validate_financing"
+      ]
+    },
+    {
+      "id": "PARENT_CARE_ANALYSIS",
+      "requires": [
+        "BASELINE_CALCULATE",
+        "DEADLINE_IDENTIFY"
+      ],
+      "applicability": "topic:PARENT_CARE",
+      "required_output_keys": [
+        "annual_range",
+        "cashflow_effect"
+      ],
+      "validators": [
+        "validate_generic_domain"
+      ]
+    },
+    {
+      "id": "RELOCATION_ANALYSIS",
+      "requires": [
+        "BASELINE_CALCULATE",
+        "DEADLINE_IDENTIFY"
+      ],
+      "applicability": "topic:RELOCATION",
+      "required_output_keys": [
+        "before_after",
+        "nonfinancial_constraints"
+      ],
+      "validators": [
+        "validate_generic_domain"
+      ]
+    },
+    {
+      "id": "INVESTING_ANALYSIS",
+      "requires": [
+        "BASELINE_CALCULATE"
+      ],
+      "applicability": "topic:INVESTING",
+      "required_output_keys": [
+        "near_term_goal_funds",
+        "risk_separation"
+      ],
+      "validators": [
+        "validate_generic_domain"
+      ]
+    },
+    {
+      "id": "EXTERNAL_FACT_CHECK",
+      "requires": [
+        "INPUT_VALIDATE"
+      ],
+      "applicability": "flag:requires_external_facts",
+      "required_output_keys": [
+        "facts",
+        "verification_status",
+        "conditionalized_if_unverified"
+      ],
+      "validators": [
+        "validate_external_facts"
+      ]
+    },
+    {
+      "id": "STRESS_TEST",
+      "requires": [
+        "BASELINE_CALCULATE",
+        "HOUSING_ANALYSIS",
+        "EDUCATION_ANALYSIS",
+        "CAREER_ANALYSIS",
+        "FINANCING_ANALYSIS",
+        "PARENT_CARE_ANALYSIS",
+        "RELOCATION_ANALYSIS",
+        "INVESTING_ANALYSIS",
+        "EXTERNAL_FACT_CHECK"
+      ],
+      "applicability": "always",
+      "required_output_keys": [
+        "scenarios",
+        "material_failures"
+      ],
+      "validators": [
+        "validate_stress"
+      ]
+    },
+    {
+      "id": "OPTIONS_BUILD",
+      "requires": [
+        "STRESS_TEST"
+      ],
+      "applicability": "always",
+      "required_output_keys": [
+        "options"
+      ],
+      "validators": [
+        "validate_options_build"
+      ]
+    },
+    {
+      "id": "OPTIONS_VALIDATE",
+      "requires": [
+        "OPTIONS_BUILD"
+      ],
+      "applicability": "always",
+      "required_output_keys": [
+        "all_options_validated",
+        "critical_errors",
+        "option_checks"
+      ],
+      "validators": [
+        "validate_options_validate"
+      ]
+    },
+    {
+      "id": "INTEGRITY_GATE",
+      "requires": [
+        "BASELINE_CALCULATE",
+        "HOUSING_ANALYSIS",
+        "EDUCATION_ANALYSIS",
+        "CAREER_ANALYSIS",
+        "FINANCING_ANALYSIS",
+        "PARENT_CARE_ANALYSIS",
+        "RELOCATION_ANALYSIS",
+        "INVESTING_ANALYSIS",
+        "EXTERNAL_FACT_CHECK",
+        "OPTIONS_VALIDATE"
+      ],
+      "applicability": "always",
+      "system_managed": true,
+      "required_output_keys": [
+        "status",
+        "issues",
+        "conditional_constraints",
+        "quarantined_steps"
+      ],
+      "validators": []
+    },
+    {
+      "id": "RECOMMENDATION_GATE",
+      "requires": [
+        "INTEGRITY_GATE"
+      ],
+      "applicability": "always",
+      "system_managed": true,
+      "required_output_keys": [
+        "status",
+        "reasons",
+        "unresolved_p0",
+        "conditional_constraints"
+      ],
+      "validators": []
+    },
+    {
+      "id": "FINALIZE",
+      "requires": [
+        "RECOMMENDATION_GATE"
+      ],
+      "applicability": "always",
+      "system_managed": true,
+      "required_output_keys": [
+        "final_output_mode",
+        "decision_summary"
+      ],
+      "validators": []
+    }
+  ],
+  "spec_hash": "8d4eed36efdcbfa6190b5def2f262beee399b12e487bef0b237e4cdb57fe694c"
+}

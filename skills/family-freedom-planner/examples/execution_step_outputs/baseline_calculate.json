@@ -1,0 +1,12 @@
+{
+  "derived_metrics": {
+    "stable_income_annual": 630000,
+    "annual_spend": 180000,
+    "financial_assets": 1000000,
+    "total_debt": 1000000,
+    "net_worth": 3500000,
+    "runway_months": 64.0,
+    "high_income_dependency": 0.7937
+  },
+  "calculation_source": "REFERENCE_ENGINE"
+}
