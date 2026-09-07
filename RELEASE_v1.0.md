@@ -2,7 +2,7 @@
 
 ## 定位
 
-**家庭自由度规划师** 是一个 GitHub-first、Agent-native 的家庭重大决策 Skill。
+**家庭重大决策规划助手** 是一个 GitHub-first、Agent-native 的家庭重大决策 Skill。
 
 核心承诺：
 

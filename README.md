@@ -1,4 +1,4 @@
-# 家庭自由度规划师 / Family Freedom Planner
+# 家庭重大决策规划助手 / Family Freedom Planner
 
 **v1.2.0 · Execution-Controlled + Integrity-Checked Agent Skill**
 
