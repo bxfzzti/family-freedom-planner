@@ -279,7 +279,7 @@ Family Context Capsule 可作为跨 Agent、跨会话的显式家庭上下文。
 - 前置步骤未完成，不执行下一步；
 - 适用 Domain 不允许随意 skip；
 - 住房置换未检查目标房/置换价差，不得完成住房步骤；
-- 融资未测试续贷失败，不得完成融资步骤；
+- 有续作或大额到期本金的融资必须测试续贷失败；明确无续贷、无大额到期本金的全额摊还普通按揭可记录“不适用”，但仍需复算月供和测试收入下降，见融资参考；
 - 缺 NORMAL/STRESS/SEVERE，不得完成压力测试；
 - Recommendation Gate 未 PASS / CONDITIONAL_PASS，不得 FINALIZE。
 

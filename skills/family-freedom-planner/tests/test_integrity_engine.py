@@ -8,6 +8,27 @@ spec=importlib.util.spec_from_file_location("ie",P)
 ie=importlib.util.module_from_spec(spec); spec.loader.exec_module(ie)
 
 class IntegrityEngineTests(unittest.TestCase):
+    def test_amortizing_mortgage_uses_payment_check(self):
+        result = ie.validate("financing", {
+            "loan_structure": "FULLY_AMORTIZING_FIXED_TERM", "refinance_required": False,
+            "principal": 120000, "annual_rate": 0, "years": 10,
+            "monthly_payment": 1000, "balloon_payment": 0})
+        self.assertEqual(result["integrity"]["status"], "PASS")
+
+    def test_amortizing_wrong_payment_fails(self):
+        result = ie.validate("financing", {
+            "loan_structure": "FULLY_AMORTIZING_FIXED_TERM", "refinance_required": False,
+            "principal": 120000, "annual_rate": 0, "years": 10,
+            "monthly_payment": 100, "balloon_payment": 0})
+        self.assertEqual(result["integrity"]["status"], "FAIL")
+
+    def test_amortizing_balloon_is_not_exempt(self):
+        result = ie.validate("financing", {
+            "loan_structure": "FULLY_AMORTIZING_FIXED_TERM", "refinance_required": False,
+            "principal": 120000, "annual_rate": 0, "years": 10,
+            "monthly_payment": 1000, "balloon_payment": 100000})
+        self.assertEqual(result["integrity"]["status"], "FAIL")
+
     def test_good_housing_passes(self):
         data={
             "pre_purchase_liquid_assets":400,

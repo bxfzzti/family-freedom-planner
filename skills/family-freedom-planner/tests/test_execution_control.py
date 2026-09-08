@@ -23,6 +23,31 @@ def base_input(topics=None, external=False):
 
 
 class ExecutionControlTests(unittest.TestCase):
+    def test_fixed_amortizing_mortgage_does_not_require_refinance(self):
+        valid, _ = wo.validate_financing({
+            "nominal_principal_checked": True, "refinance_failure_tested": False,
+            "refinance_required": False, "loan_structure": "FULLY_AMORTIZING_FIXED_TERM",
+            "compliance_status": "REQUIRES_VERIFICATION",
+            "results": {"balloon_payment": 0,
+                        "refinance_not_applicable_reason": "No renewal or balloon in stated contract"}}, {})
+        self.assertTrue(valid)
+
+    def test_balloon_cannot_claim_refinance_not_applicable(self):
+        valid, _ = wo.validate_financing({
+            "nominal_principal_checked": True, "refinance_failure_tested": False,
+            "refinance_required": False, "loan_structure": "FULLY_AMORTIZING_FIXED_TERM",
+            "compliance_status": "VERIFIED",
+            "results": {"balloon_payment": 100000,
+                        "refinance_not_applicable_reason": "claimed not applicable"}}, {})
+        self.assertFalse(valid)
+
+    def test_refinance_not_applicable_needs_reason(self):
+        valid, _ = wo.validate_financing({
+            "nominal_principal_checked": True, "refinance_failure_tested": False,
+            "refinance_required": False, "loan_structure": "FULLY_AMORTIZING_FIXED_TERM",
+            "compliance_status": "VERIFIED", "results": {"balloon_payment": 0}}, {})
+        self.assertFalse(valid)
+
     def test_old_workflow_run_requires_reinitialization(self):
         run = wo.init_run(base_input())
         run["workflow_version"] = "1.2.0"
@@ -104,7 +129,7 @@ class ExecutionControlTests(unittest.TestCase):
         wo.complete_step(run, "BASELINE_CALCULATE", {
             "derived_metrics":{
                 "stable_income_annual":1,"annual_spend":1,"financial_assets":1,
-                "total_debt":0,"net_worth":1,"runway_months":12,
+                "total_debt":0,"net_worth":1,"total_assets":1,"annual_surplus":0,"runway_months":12,
                 "high_income_dependency":0
             },
             "calculation_source":"REFERENCE_ENGINE"
@@ -124,7 +149,7 @@ class ExecutionControlTests(unittest.TestCase):
         wo.complete_step(run, "BASELINE_CALCULATE", {
             "derived_metrics":{
                 "stable_income_annual":1,"annual_spend":1,"financial_assets":1,
-                "total_debt":0,"net_worth":1,"runway_months":12,
+                "total_debt":0,"net_worth":1,"total_assets":1,"annual_surplus":0,"runway_months":12,
                 "high_income_dependency":0
             },
             "calculation_source":"REFERENCE_ENGINE"
@@ -146,7 +171,7 @@ class ExecutionControlTests(unittest.TestCase):
         wo.complete_step(run, "BASELINE_CALCULATE", {
             "derived_metrics":{
                 "stable_income_annual":1,"annual_spend":1,"financial_assets":1,
-                "total_debt":0,"net_worth":1,"runway_months":12,
+                "total_debt":0,"net_worth":1,"total_assets":1,"annual_surplus":0,"runway_months":12,
                 "high_income_dependency":0
             },
             "calculation_source":"REFERENCE_ENGINE"
@@ -214,7 +239,7 @@ class ExecutionControlTests(unittest.TestCase):
         wo.complete_step(run, "BASELINE_CALCULATE", {
             "derived_metrics":{
                 "stable_income_annual":100,"annual_spend":50,"financial_assets":100,
-                "total_debt":0,"net_worth":100,"runway_months":24,
+                "total_debt":0,"net_worth":100,"total_assets":100,"annual_surplus":50,"runway_months":24,
                 "high_income_dependency":0.5
             },
             "calculation_source":"REFERENCE_ENGINE"

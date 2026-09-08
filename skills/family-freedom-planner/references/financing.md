@@ -59,3 +59,27 @@
 不提供伪造经营用途、绕风控、虚假交易或违规改变贷款用途的方法。
 
 无法确认合规时，标记 `REQUIRES_VERIFICATION`，并模拟普通按揭或自有资金备选。
+
+## 普通长期按揭与续作融资分开处理
+
+普通全额摊还、固定期限且明确无续贷/大额到期本金的按揭，续贷失败测试为“不适用”，不能伪报已测试。仍须核对本金、月供、利率与期限，测试收入下降和实际付款顺序。
+
+向控制器提交 FINANCING_ANALYSIS 时，使用：
+
+```json
+{
+  "nominal_principal_checked": true,
+  "refinance_failure_tested": false,
+  "refinance_required": false,
+  "loan_structure": "FULLY_AMORTIZING_FIXED_TERM",
+  "compliance_status": "REQUIRES_VERIFICATION",
+  "results": {
+    "balloon_payment": 0,
+    "refinance_not_applicable_reason": "给定合同假设为全额摊还、无需续贷；真实合同执行前需核实"
+  }
+}
+```
+
+完整性检查可用 integrity_engine.validate("financing", data)，data 包含同样的 loan_structure/refinance_required，以及 principal、annual_rate、years、monthly_payment、balloon_payment=0。这会独立复算按揭月供，而不是把全部按揭本金假设为立即到期。
+
+只要存在续作、授信重审或大额到期本金，仍须执行续贷失败测试。不清楚贷款结构时不能使用“不适用”；合同条件未核实保持条件化结论。

@@ -9,6 +9,28 @@ spec=importlib.util.spec_from_file_location("wo2",P)
 wo=importlib.util.module_from_spec(spec); spec.loader.exec_module(wo)
 
 class IntegrityGateTests(unittest.TestCase):
+    def test_claimed_pass_cannot_hide_wrong_baseline(self):
+        run = self._base_ready()
+        metrics = run["steps"]["BASELINE_CALCULATE"]["output"]["derived_metrics"]
+        metrics.update(total_assets=100, annual_surplus=50, net_worth=999)
+        wo.record_integrity_result(run, "BASELINE_CALCULATE", self._pass_result())
+        self.assertEqual(run["steps"]["BASELINE_CALCULATE"]["status"], "QUARANTINED")
+
+    def test_incomplete_numeric_basis_does_not_get_unconditional_pass(self):
+        run = self._base_ready()
+        metrics = run["steps"]["BASELINE_CALCULATE"]["output"]["derived_metrics"]
+        metrics.pop("total_assets", None)
+        metrics.pop("annual_surplus", None)
+        wo.record_integrity_result(run, "BASELINE_CALCULATE", self._pass_result())
+        wo.evaluate_integrity_gate(run)
+        self.assertEqual(run["integrity_gate"]["status"], "CONDITIONAL_PASS")
+
+    def test_wrong_integrity_domain_rejected(self):
+        result = self._pass_result()
+        result["domain"] = "housing"
+        with self.assertRaises(wo.WorkflowError):
+            wo.record_integrity_result(self._base_ready(), "BASELINE_CALCULATE", result)
+
     def test_finalize_rechecks_changed_output(self):
         run = self._base_ready()
         wo.record_integrity_result(run, "BASELINE_CALCULATE", self._pass_result())
@@ -70,7 +92,7 @@ class IntegrityGateTests(unittest.TestCase):
         wo.complete_step(run,"BASELINE_CALCULATE",{
             "derived_metrics":{
                 "stable_income_annual":100,"annual_spend":50,"financial_assets":100,
-                "total_debt":0,"net_worth":100,"runway_months":24,
+                "total_debt":0,"net_worth":100,"total_assets":100,"annual_surplus":50,"runway_months":24,
                 "high_income_dependency":0.5
             },
             "calculation_source":"REFERENCE_ENGINE"

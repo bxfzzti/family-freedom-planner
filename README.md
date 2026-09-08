@@ -1,6 +1,6 @@
 # 家庭重大决策规划助手 / Family Freedom Planner
 
-**v1.3.1 · 渐进问诊 · 一页决策摘要 · 可追溯评估**
+**v1.3.2 · 完整规划实测 · 普通按揭分流 · 安装自检**
 
 
 **别焦虑，把不可控的未来，变成可判断的条件。**
@@ -50,7 +50,7 @@ Skill 路径是 skills/family-freedom-planner。
 本轮已完成10个案例、12轮实际回答的语义审阅（同一模型、独立上下文），
 原始回答见 [对话记录](skills/family-freedom-planner/evals/results/v1.3-dialogue-recordings.json)，
 判定依据见 [审阅证据](skills/family-freedom-planner/evals/results/v1.3-dialogue-reviews.json)。
-完整改动、108项脚本测试及验证边界见 [v1.3说明](RELEASE_v1.3.md)。
+完整改动、120项脚本测试及验证边界见 [v1.3说明](RELEASE_v1.3.md)。
 
 虚构完整演示（不保存文件、不联网）：
 
@@ -64,6 +64,15 @@ python skills/family-freedom-planner/scripts/demo_controlled_run.py
 python skills/family-freedom-planner/scripts/decision_cashflow.py \
   skills/family-freedom-planner/examples/decision_cashflow_case.json
 ```
+
+安装后自检：
+
+```bash
+python skills/family-freedom-planner/scripts/check_installation.py
+```
+
+自检 PASS 表示技能文件完整且本地计算可运行，不表示客户端已经验证自动调用。完整规划的失败复现、修复后重跑和条件化结果见
+[`v1.3.2完整规划试用`](skills/family-freedom-planner/evals/results/v1.3.2-full-plan-trial.md)。
 
 旧版 run.json 不直接沿用；家庭上下文可以继续使用，但需确认数据口径后重新初始化工作流。
 

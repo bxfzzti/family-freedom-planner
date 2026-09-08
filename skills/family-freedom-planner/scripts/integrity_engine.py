@@ -88,6 +88,21 @@ def validate_housing(data):
 def validate_financing(data):
     checks=[]
     issues=[]
+    if (data.get("loan_structure") == "FULLY_AMORTIZING_FIXED_TERM"
+            and data.get("refinance_required") is False):
+        years = data["years"]
+        if (data["balloon_payment"] != 0 or years <= 0
+                or not math.isclose(years * 12, round(years * 12), abs_tol=1e-7)
+                or years * 12 < 1):
+            return [], ["amortizing loan requires whole positive months and zero balloon"]
+        try:
+            expected = mortgage_payment_independent(
+                data["principal"], data["annual_rate"], years)
+        except (ValueError, ZeroDivisionError, OverflowError):
+            return [], ["independent payment calculation could not be completed"]
+        checks.append(check_close("amortizing_monthly_payment",
+                                  data["monthly_payment"], expected, 1e-7))
+        return checks, issues
     balance=float(data.get("principal_due_or_current_balance",0) or 0)
     refi=float(data.get("confirmed_refinance_amount",0) or 0)
     safe=float(data.get("safely_available_for_debt",0) or 0)
@@ -157,6 +172,11 @@ def validate(domain, data):
     }
     signed = {"net_worth", "annual_surplus", "replacement_spread",
               "post_purchase_liquid_assets"}
+    if (domain == "financing" and isinstance(data, dict)
+            and data.get("loan_structure") == "FULLY_AMORTIZING_FIXED_TERM"
+            and data.get("refinance_required") is False):
+        numeric_fields["financing"] = ("principal", "annual_rate", "years",
+                                       "monthly_payment", "balloon_payment")
     input_issues = []
     if not isinstance(data, dict):
         input_issues.append("result must be an object")

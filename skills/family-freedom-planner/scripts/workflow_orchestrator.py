@@ -285,7 +285,17 @@ def validate_financing(output, run):
     if output["nominal_principal_checked"] is not True:
         return False, "nominal principal must be checked"
     if output["refinance_failure_tested"] is not True:
-        return False, "refinance failure must be tested"
+        results = output.get("results")
+        reason = results.get("refinance_not_applicable_reason") if isinstance(results, dict) else None
+        balloon = results.get("balloon_payment") if isinstance(results, dict) else None
+        not_applicable = (
+            output["refinance_failure_tested"] is False
+            and output.get("refinance_required") is False
+            and output.get("loan_structure") == "FULLY_AMORTIZING_FIXED_TERM"
+            and finite_number(balloon) and balloon == 0
+            and isinstance(reason, str) and bool(reason.strip()))
+        if not not_applicable:
+            return False, "test refinance failure or document a fully amortizing loan with no renewal/balloon"
     if output["compliance_status"] not in ("VERIFIED","REQUIRES_VERIFICATION","NOT_APPLICABLE"):
         return False, "invalid compliance_status"
     return True, "ok"
@@ -464,6 +474,12 @@ def record_integrity_result(run, step_id, result):
         raise WorkflowError("integrity results require a completed current step")
     if not isinstance(result, dict) or not isinstance(result.get("integrity"), dict):
         raise WorkflowError("missing integrity result")
+    expected_domain = {
+        "BASELINE_CALCULATE": "baseline", "HOUSING_ANALYSIS": "housing",
+        "FINANCING_ANALYSIS": "financing", "EDUCATION_ANALYSIS": "education",
+        "CAREER_ANALYSIS": "career"}.get(step_id)
+    if expected_domain and result.get("domain") != expected_domain:
+        raise WorkflowError(f"{step_id} requires {expected_domain} integrity evidence")
     integrity = result["integrity"]
     status = integrity.get("status")
     checks = result.get("cross_checks")
@@ -474,6 +490,26 @@ def record_integrity_result(run, step_id, result):
                             or not all(isinstance(x, dict) and x.get("pass") is True for x in checks)):
         raise WorkflowError("PASS requires successful nonempty cross-checks and no issues")
     result = copy.deepcopy(result)
+    # Recompute available baseline identities from the actual stored output,
+    # rather than trusting an externally supplied PASS label.
+    if step_id == "BASELINE_CALCULATE":
+        metrics = run["steps"][step_id]["output"]["derived_metrics"]
+        runtime = _load_integrity_module().validate("baseline", metrics)
+        needed = {"total_assets", "total_debt", "net_worth", "stable_income_annual",
+                  "annual_spend", "annual_surplus"}
+        if needed - set(metrics) and runtime["integrity"]["status"] != "FAIL":
+            runtime["integrity"] = {
+                "status": "WARN", "confidence": "MEDIUM",
+                "issues": ["baseline identities incomplete: " + ", ".join(sorted(needed - set(metrics)))]}
+        result["runtime_verification"] = runtime
+        result["cross_checks"].extend(runtime["cross_checks"])
+        runtime_status = runtime["integrity"]["status"]
+        if runtime_status == "FAIL":
+            result["integrity"] = {
+                "status": "FAIL", "confidence": "LOW",
+                "issues": integrity["issues"] + runtime["integrity"]["issues"]}
+        elif runtime_status == "WARN" and status == "PASS":
+            result["integrity"] = runtime["integrity"]
     if status in ("WARN", "FAIL") and not result["integrity"]["issues"]:
         result["integrity"]["issues"] = ["integrity check did not pass"]
     current_digest = output_digest(run["steps"][step_id]["output"])
@@ -648,6 +684,11 @@ def evaluate_gate(run):
         reasons.append("options are not fully validated")
     if ov.get("critical_errors"):
         reasons.append(f"critical option errors: {ov['critical_errors']}")
+
+    financing = run["steps"]["FINANCING_ANALYSIS"]
+    if (financing["status"] == "COMPLETE"
+            and financing["output"].get("compliance_status") == "REQUIRES_VERIFICATION"):
+        conditional.append("financing contract/compliance must be verified before execution")
 
     ext = run["steps"]["EXTERNAL_FACT_CHECK"]
     if ext["status"] == "COMPLETE":
