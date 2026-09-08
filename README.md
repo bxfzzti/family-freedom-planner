@@ -1,6 +1,6 @@
 # 家庭重大决策规划助手 / Family Freedom Planner
 
-**v1.3.0 · 渐进问诊 · 一页决策摘要 · 可追溯评估**
+**v1.3.1 · 渐进问诊 · 一页决策摘要 · 可追溯评估**
 
 
 **别焦虑，把不可控的未来，变成可判断的条件。**
@@ -50,7 +50,7 @@ Skill 路径是 skills/family-freedom-planner。
 本轮已完成10个案例、12轮实际回答的语义审阅（同一模型、独立上下文），
 原始回答见 [对话记录](skills/family-freedom-planner/evals/results/v1.3-dialogue-recordings.json)，
 判定依据见 [审阅证据](skills/family-freedom-planner/evals/results/v1.3-dialogue-reviews.json)。
-完整改动、101项脚本测试及验证边界见 [v1.3说明](RELEASE_v1.3.md)。
+完整改动、108项脚本测试及验证边界见 [v1.3说明](RELEASE_v1.3.md)。
 
 虚构完整演示（不保存文件、不联网）：
 
