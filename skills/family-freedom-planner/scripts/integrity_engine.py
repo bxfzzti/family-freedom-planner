@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Result integrity checks for Family Freedom Planner v1.2.
+"""Result integrity checks for Family Freedom Planner v1.4.
 
 Standard-library only.
 """
@@ -121,17 +121,22 @@ def validate_financing(data):
 
 
 def validate_education(data):
+    checks=[]
     issues=[]
     base=data.get("BASE")
     mid=data.get("MID")
     high=data.get("HIGH")
     if all(isinstance(x,(int,float)) for x in (base,mid,high)):
-        if not (base <= mid <= high):
-            issues.append("education scenarios must satisfy BASE <= MID <= HIGH")
-    return [], issues
+        checks.append({"name": "education_scenario_monotonic",
+                       "pass": base <= mid <= high,
+                       "actual": {"BASE": base, "MID": mid, "HIGH": high}})
+    else:
+        issues.append("education scenarios require numeric BASE, MID and HIGH")
+    return checks, issues
 
 
 def validate_career(data):
+    checks=[]
     issues=[]
     current=data.get("current_stable_income")
     reduced=data.get("reduced_main_income")
@@ -139,9 +144,10 @@ def validate_career(data):
     resulting=data.get("resulting_stable_income")
     if None not in (current,reduced,resulting):
         theoretical=float(current)-float(reduced)+float(new_sources)
-        if float(resulting) > theoretical*1.01:
-            issues.append("career income increased beyond declared new income sources")
-    return [], issues
+        checks.append(check_close("career_income_identity", resulting, theoretical, 0.005))
+    else:
+        issues.append("career integrity inputs are incomplete")
+    return checks, issues
 
 
 def summarize(checks, issues):

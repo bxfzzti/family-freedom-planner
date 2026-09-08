@@ -1,5 +1,25 @@
 # Stateful Replan：家庭状态持续更新
 
+## v1.4 统一上下文
+
+当前 `family-context.json` 是一个信封：顶层保存目标、假设、待确认问题和决策记录；`family_state` 使用 assets/family-state.schema.json 的统一结构。金额固定为人民币元，收入和支出固定为年度，收入明确 AFTER_TAX/BEFORE_TAX/UNKNOWN，年支出明确是否已包含债务还款。
+
+每个已知关键金额在 `family_state.source_tags` 中按字段路径记录 source_type、as_of 和 confidence。上下文可包含未知值；交给计算引擎前必须通过：
+
+```bash
+python scripts/validate_family_state.py family-context.json --calculation-ready
+```
+
+旧0.9文件先迁移：
+
+```bash
+python scripts/migrate_context.py family-context-old.json
+```
+
+迁移不会把“现金+金融资产”当成现金，也不会猜税前税后。它写入 `unallocated_financial_assets`、`tax_basis=UNKNOWN` 和待确认问题，状态可继续问诊但不能直接测算。示例见 examples/family-context-v1.4-migrated.json。
+
+下面的0.9结构仅用于说明旧格式和迁移来源，不是新建文件模板。
+
 ## 只说变化，不等于删除其他资料
 
 两个完整上下文快照可用 state_diff.py 的默认 snapshot 模式比较。用户仅说“现金变成80万”时，用 --mode update 比较局部更新；未提及的收入、负债和目标必须保留。

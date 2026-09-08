@@ -6,21 +6,5 @@
     "EDUCATION",
     "CAREER"
   ],
-  "requires_external_facts": true,
-  "known_context": {
-    "adult_ages": [
-      38,
-      36
-    ],
-    "children_ages": [
-      3,
-      1
-    ],
-    "stable_household_income_annual": 630000,
-    "annual_spend": 180000,
-    "financial_assets": 1000000,
-    "primary_home_value": 3500000,
-    "primary_home_debt": 1000000,
-    "high_income_horizon_years": 4
-  }
+  "requires_external_facts": true
 }

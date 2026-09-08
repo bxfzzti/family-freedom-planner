@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.4.0",
+  "as_of": "2026-09",
+  "family_state": {
+    "schema_version": "1.4.0",
+    "as_of": "2026-09",
+    "currency": "CNY",
+    "amount_unit": "yuan",
+    "income": {
+      "period": "annual",
+      "tax_basis": "UNKNOWN",
+      "stable_annual": {
+        "household_reported": 630000
+      },
+      "high_risk_annual": 500000
+    },
+    "expenses": {
+      "period": "annual",
+      "annual_total": 180000,
+      "annual_mandatory": null,
+      "annual_total_includes_debt_payments": null
+    },
+    "assets": {
+      "cash": null,
+      "low_risk_investments": null,
+      "investments": null,
+      "other_liquid": null,
+      "unallocated_financial_assets": 1000000,
+      "real_estate": [
+        {
+          "id": "primary_home",
+          "market_value": 3500000,
+          "linked_debt_balance": 1000000,
+          "sellable_for_plan": null
+        }
+      ],
+      "other_non_liquid": null
+    },
+    "debts": {
+      "items": [
+        {
+          "id": "primary_home_debt",
+          "balance": 1000000,
+          "balance_basis": "CURRENT_BALANCE"
+        }
+      ]
+    },
+    "household": {
+      "adult_ages": [
+        38,
+        36
+      ],
+      "children_ages": [
+        3,
+        1
+      ]
+    },
+    "career": {},
+    "education": {},
+    "housing": {
+      "target_home_budget": 5000000
+    },
+    "preferences": {},
+    "deadlines": [],
+    "primary_decision": null,
+    "source_tags": {
+      "income.stable_annual.household_reported": {
+        "source_type": "USER_ESTIMATE",
+        "as_of": "2026-09",
+        "confidence": "MEDIUM"
+      },
+      "income.high_risk_annual": {
+        "source_type": "USER_ESTIMATE",
+        "as_of": "2026-09",
+        "confidence": "MEDIUM"
+      },
+      "expenses.annual_total": {
+        "source_type": "USER_ESTIMATE",
+        "as_of": "2026-09",
+        "confidence": "MEDIUM"
+      },
+      "assets.unallocated_financial_assets": {
+        "source_type": "USER_ESTIMATE",
+        "as_of": "2026-09",
+        "confidence": "MEDIUM"
+      },
+      "assets.real_estate.0.market_value": {
+        "source_type": "USER_ESTIMATE",
+        "as_of": "2026-09",
+        "confidence": "MEDIUM"
+      },
+      "assets.real_estate.0.linked_debt_balance": {
+        "source_type": "USER_ESTIMATE",
+        "as_of": "2026-09",
+        "confidence": "MEDIUM"
+      },
+      "debts.items.0.balance": {
+        "source_type": "USER_ESTIMATE",
+        "as_of": "2026-09",
+        "confidence": "MEDIUM"
+      }
+    }
+  },
+  "goals": [
+    "2030前解决学区与改善住房",
+    "逐步降低高薪依赖"
+  ],
+  "assumptions": [],
+  "open_questions": [
+    "确认家庭收入是税前还是税后，并拆分稳定收入来源",
+    "把合并金融资产拆分为现金、低风险资产、波动资产和其他流动资产",
+    "确认年支出是否包含全部债务还款，并填写必要支出"
+  ],
+  "decision_journal": [],
+  "migration": {
+    "from": "0.9",
+    "to": "1.4.0",
+    "calculation_ready": false,
+    "reason": "legacy tax, spending and financial-asset composition are not explicit"
+  }
+}

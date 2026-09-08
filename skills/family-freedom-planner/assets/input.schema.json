@@ -1,61 +1,20 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Family Freedom Planner Household State",
+  "title": "Family Freedom Planner Workflow Input v1.4",
   "type": "object",
+  "required": ["user_text"],
   "properties": {
-    "as_of": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "locale": {
-      "type": "object"
-    },
-    "adults": {
+    "run_id": {"type": "string", "minLength": 1},
+    "user_text": {"type": "string", "minLength": 1},
+    "selected_topics": {
       "type": "array",
-      "items": {
-        "type": "object"
-      }
+      "minItems": 1,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": {"enum": ["GENERAL", "HOUSING_EXISTING", "HOUSING_FIRST_BUY", "EDUCATION", "CAREER", "SPOUSE_BREAK", "FINANCING", "PARENT_CARE", "RELOCATION", "INVESTING"]}
     },
-    "children": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      }
-    },
-    "income": {
-      "type": "object"
-    },
-    "expenses": {
-      "type": "object"
-    },
-    "assets": {
-      "type": "object"
-    },
-    "debts": {
-      "type": "object"
-    },
-    "career": {
-      "type": "object"
-    },
-    "education": {
-      "type": "object"
-    },
-    "housing": {
-      "type": "object"
-    },
-    "preferences": {
-      "type": "object"
-    },
-    "deadlines": {
-      "type": "array"
-    },
-    "primary_decision": {
-      "type": [
-        "string",
-        "null"
-      ]
-    }
-  }
+    "requires_external_facts": {"type": "boolean"},
+    "family_state": {"$ref": "family-state.schema.json"}
+  },
+  "additionalProperties": false
 }

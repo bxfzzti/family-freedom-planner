@@ -2,7 +2,7 @@ import importlib.util
 import json
 import unittest
 from pathlib import Path
-from workflow_fixtures import stress_scenarios
+from workflow_fixtures import baseline_output, state_build, stress_scenarios
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "workflow_orchestrator.py"
@@ -18,11 +18,22 @@ def base_input(topics=None, external=False):
         "user_text":"test",
         "selected_topics": topics or ["GENERAL"],
         "requires_external_facts": external,
-        "known_context":{}
     }
 
 
 class ExecutionControlTests(unittest.TestCase):
+    def test_legacy_known_context_rejected(self):
+        data = base_input()
+        data["known_context"] = {}
+        with self.assertRaises(wo.WorkflowError):
+            wo.init_run(data)
+
+    def test_invalid_family_state_rejected_at_init(self):
+        data = base_input()
+        data["family_state"] = {"schema_version": "0.9"}
+        with self.assertRaises(wo.WorkflowError):
+            wo.init_run(data)
+
     def test_fixed_amortizing_mortgage_does_not_require_refinance(self):
         valid, _ = wo.validate_financing({
             "nominal_principal_checked": True, "refinance_failure_tested": False,
@@ -123,17 +134,10 @@ class ExecutionControlTests(unittest.TestCase):
         run = wo.init_run(base_input(["HOUSING_EXISTING"]))
         # Manually prepare prereqs via helper.
         wo.complete_step(run, "INTAKE_ROUTE", {"selected_topics":["HOUSING_EXISTING"],"known_facts":{},"missing_fields":[]})
-        wo.complete_step(run, "STATE_BUILD", {"family_state":{},"source_tags":{}})
+        wo.complete_step(run, "STATE_BUILD", state_build())
         wo.complete_step(run, "INPUT_VALIDATE", {"status":"READY","missing_p0":[],"conflicts":[]})
         wo.complete_step(run, "DEADLINE_IDENTIFY", {"deadlines":[],"deadline_collision":False})
-        wo.complete_step(run, "BASELINE_CALCULATE", {
-            "derived_metrics":{
-                "stable_income_annual":1,"annual_spend":1,"financial_assets":1,
-                "total_debt":0,"net_worth":1,"total_assets":1,"annual_surplus":0,"runway_months":12,
-                "high_income_dependency":0
-            },
-            "calculation_source":"REFERENCE_ENGINE"
-        })
+        wo.complete_step(run, "BASELINE_CALCULATE", baseline_output())
         with self.assertRaises(wo.WorkflowError):
             wo.complete_step(run, "HOUSING_ANALYSIS", {
                 "mode":"x",
@@ -144,16 +148,9 @@ class ExecutionControlTests(unittest.TestCase):
     def test_financing_requires_failure_test(self):
         run = wo.init_run(base_input(["FINANCING"]))
         wo.complete_step(run, "INTAKE_ROUTE", {"selected_topics":["FINANCING"],"known_facts":{},"missing_fields":[]})
-        wo.complete_step(run, "STATE_BUILD", {"family_state":{},"source_tags":{}})
+        wo.complete_step(run, "STATE_BUILD", state_build())
         wo.complete_step(run, "INPUT_VALIDATE", {"status":"READY","missing_p0":[],"conflicts":[]})
-        wo.complete_step(run, "BASELINE_CALCULATE", {
-            "derived_metrics":{
-                "stable_income_annual":1,"annual_spend":1,"financial_assets":1,
-                "total_debt":0,"net_worth":1,"total_assets":1,"annual_surplus":0,"runway_months":12,
-                "high_income_dependency":0
-            },
-            "calculation_source":"REFERENCE_ENGINE"
-        })
+        wo.complete_step(run, "BASELINE_CALCULATE", baseline_output())
         with self.assertRaises(wo.WorkflowError):
             wo.complete_step(run, "FINANCING_ANALYSIS", {
                 "nominal_principal_checked":True,
@@ -165,17 +162,10 @@ class ExecutionControlTests(unittest.TestCase):
     def test_stress_requires_three_scenarios(self):
         run = wo.init_run(base_input())
         wo.complete_step(run, "INTAKE_ROUTE", {"selected_topics":["GENERAL"],"known_facts":{},"missing_fields":[]})
-        wo.complete_step(run, "STATE_BUILD", {"family_state":{},"source_tags":{}})
+        wo.complete_step(run, "STATE_BUILD", state_build())
         wo.complete_step(run, "INPUT_VALIDATE", {"status":"READY","missing_p0":[],"conflicts":[]})
         wo.complete_step(run, "DEADLINE_IDENTIFY", {"deadlines":[],"deadline_collision":False})
-        wo.complete_step(run, "BASELINE_CALCULATE", {
-            "derived_metrics":{
-                "stable_income_annual":1,"annual_spend":1,"financial_assets":1,
-                "total_debt":0,"net_worth":1,"total_assets":1,"annual_surplus":0,"runway_months":12,
-                "high_income_dependency":0
-            },
-            "calculation_source":"REFERENCE_ENGINE"
-        })
+        wo.complete_step(run, "BASELINE_CALCULATE", baseline_output())
         with self.assertRaises(wo.WorkflowError):
             wo.complete_step(run, "STRESS_TEST", {
                 "scenarios":{"NORMAL":{},"STRESS":{}},
@@ -229,21 +219,14 @@ class ExecutionControlTests(unittest.TestCase):
     def _run_to_options(self, missing_p0=None, external=False, external_verified=True):
         run = wo.init_run(base_input(["GENERAL"], external))
         wo.complete_step(run, "INTAKE_ROUTE", {"selected_topics":["GENERAL"],"known_facts":{},"missing_fields":[]})
-        wo.complete_step(run, "STATE_BUILD", {"family_state":{},"source_tags":{}})
+        wo.complete_step(run, "STATE_BUILD", state_build())
         wo.complete_step(run, "INPUT_VALIDATE", {
             "status":"PARTIAL" if missing_p0 else "READY",
             "missing_p0":missing_p0 or [],
             "conflicts":[]
         })
         wo.complete_step(run, "DEADLINE_IDENTIFY", {"deadlines":[],"deadline_collision":False})
-        wo.complete_step(run, "BASELINE_CALCULATE", {
-            "derived_metrics":{
-                "stable_income_annual":100,"annual_spend":50,"financial_assets":100,
-                "total_debt":0,"net_worth":100,"total_assets":100,"annual_surplus":50,"runway_months":24,
-                "high_income_dependency":0.5
-            },
-            "calculation_source":"REFERENCE_ENGINE"
-        })
+        wo.complete_step(run, "BASELINE_CALCULATE", baseline_output())
         if external:
             wo.complete_step(run, "EXTERNAL_FACT_CHECK", {
                 "facts":[{"x":1}],

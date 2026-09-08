@@ -235,6 +235,8 @@ license: Apache-2.0
 
 Family Context Capsule 可作为跨 Agent、跨会话的显式家庭上下文。
 
+v1.4 Capsule 以 `family_state` 保存统一状态，金额固定为人民币元、收入与支出固定为年度口径，并为每个关键数字保存来源标签。载入后先运行 `scripts/validate_family_state.py`；进入确定性计算时加 `--calculation-ready`。旧0.9 Capsule 先运行 `scripts/migrate_context.py`，迁移结果默认不可直接计算，必须确认税前税后、支出是否含债务还款及金融资产组成。
+
 ## 外部事实
 
 涉及当前政策、利率、学区规则、收费、税费、房价、租金时，如果环境允许联网或连接数据源，应获取当前信息，并标记日期与来源。

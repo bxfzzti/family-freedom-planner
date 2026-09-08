@@ -1,5 +1,11 @@
 # Execution Control & Recommendation Gate
 
+## v1.4 数据与门禁
+
+STATE_BUILD只接受v1.4标准family_state，外层source_tags必须与family_state.source_tags相同。BASELINE从该状态确定性生成；旧known_context输入不再接受。
+
+INTEGRITY_GATE会自动运行所有关键步骤的复算，STRESS_TEST和OPTIONS_VALIDATE也在必检范围。额外完整性记录用于补充来源或独立算法证据，不能取代运行时复算。
+
 ## v1.3 运行兼容性
 
 运行记录绑定工作流版本与内容 hash。旧版本 run.json 需使用已确认的原始家庭输入重新初始化，不沿用旧步骤的 COMPLETE 或 PASS。

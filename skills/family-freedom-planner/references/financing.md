@@ -83,3 +83,5 @@
 完整性检查可用 integrity_engine.validate("financing", data)，data 包含同样的 loan_structure/refinance_required，以及 principal、annual_rate、years、monthly_payment、balloon_payment=0。这会独立复算按揭月供，而不是把全部按揭本金假设为立即到期。
 
 只要存在续作、授信重审或大额到期本金，仍须执行续贷失败测试。不清楚贷款结构时不能使用“不适用”；合同条件未核实保持条件化结论。
+
+多方案时将每笔可比较贷款放入 `results.loans[]`，每项带对应 `option_id` 和完整月供/续贷复算输入。不能只检查最高或推荐方案；OPTIONS_VALIDATE会核对每个方案的融资与压力测试覆盖。

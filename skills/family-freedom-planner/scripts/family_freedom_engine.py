@@ -9,8 +9,19 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import importlib.util
 from pathlib import Path
 from typing import Any
+
+
+def validate_calculation_state(state):
+    path = Path(__file__).with_name("validate_family_state.py")
+    spec = importlib.util.spec_from_file_location("ffp_state_validator", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    result = module.validate_state(state, calculation_ready=True)
+    if result["status"] != "PASS":
+        raise ValueError("family state is not calculation-ready: " + "; ".join(result["errors"]))
 
 
 def n(value: Any, default: float | None = None, *, allow_negative=False) -> float:
@@ -53,6 +64,7 @@ def mortgage_payment(principal: float, annual_rate: float, years: float) -> floa
 
 
 def baseline(state: dict) -> dict:
+    validate_calculation_state(state)
     mapping(state, "state")
     income = mapping(state.get("income"), "income")
     expenses = mapping(state.get("expenses"), "expenses")

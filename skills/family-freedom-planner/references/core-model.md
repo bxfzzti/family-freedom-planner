@@ -1,5 +1,11 @@
 # 核心家庭模型
 
+## v1.4 标准输入
+
+计算只接受 assets/family-state.schema.json 对应的标准状态。金额为人民币元，收入和支出为年度，收入税收口径必须是 AFTER_TAX，年支出必须声明是否已经包含债务还款。每个关键金额通过 source_tags 保存来源、日期和置信度。
+
+运行 `python scripts/validate_family_state.py <文件> --calculation-ready` 后再进入baseline。旧上下文、税前收入、合并但未拆分的金融资产、未知债务余额不能直接计算。
+
 ## 基本计算
 
 `家庭稳定收入 = 两位成人稳定税后收入 + 可验证副业 + 其他稳定收入`

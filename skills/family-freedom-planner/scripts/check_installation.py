@@ -17,10 +17,13 @@ def check(root=ROOT):
     root = Path(root).resolve()
     issues = []
     required = [
-        "SKILL.md", "agents/openai.yaml", "workflow.yaml", "assets/workflow.compiled.json",
+        "SKILL.md", "agents/openai.yaml", "workflow.yaml",
+        "assets/workflow.compiled.json", "assets/family-state.schema.json",
+        "assets/input.schema.json", "assets/family-context.schema.json",
         "scripts/family_freedom_engine.py", "scripts/workflow_orchestrator.py",
         "scripts/integrity_engine.py", "scripts/intake_router.py",
-        "scripts/decision_cashflow.py", "scripts/state_diff.py"]
+        "scripts/decision_cashflow.py", "scripts/state_diff.py",
+        "scripts/validate_family_state.py", "scripts/migrate_context.py"]
     for relative in required:
         if not (root / relative).is_file():
             issues.append(f"missing file: {relative}")

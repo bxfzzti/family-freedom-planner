@@ -1,12 +1,20 @@
 {
   "derived_metrics": {
-    "stable_income_annual": 630000,
+    "stable_income_annual": 660000,
     "annual_spend": 180000,
+    "mandatory_cashflow_annual": 150000,
+    "annual_surplus": 480000,
+    "savings_rate": 0.7272727272727273,
     "financial_assets": 1000000,
+    "low_risk_assets": 800000,
+    "total_assets": 4500000,
     "total_debt": 1000000,
     "net_worth": 3500000,
-    "runway_months": 64.0,
-    "high_income_dependency": 0.7937
+    "runway_months": 64,
+    "runway_basis": "zero_income_mandatory_spending_coverage",
+    "mandatory_spending_basis": "user_provided",
+    "high_income_dependency": 0.7575757575757576,
+    "property_lock_ratio": 0
   },
   "calculation_source": "REFERENCE_ENGINE"
 }

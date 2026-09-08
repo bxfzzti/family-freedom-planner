@@ -26,7 +26,7 @@ class EndToEndTests(unittest.TestCase):
 
     def finish_from_state(self, run, state, financing=None):
         workflow.complete_step(run, "STATE_BUILD", {
-            "family_state": state, "source_tags": {"all": "MODEL_ASSUMPTION"}})
+            "family_state": state, "source_tags": state["source_tags"]})
         workflow.complete_step(run, "INPUT_VALIDATE", {
             "status": "READY", "missing_p0": [], "conflicts": []})
         workflow.complete_step(run, "DEADLINE_IDENTIFY", {

@@ -1,60 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Family Freedom Planner Context Capsule",
+  "title": "Family Freedom Planner Context Capsule v1.4",
   "type": "object",
-  "required": [
-    "schema_version",
-    "as_of"
-  ],
+  "required": ["schema_version", "as_of", "family_state", "goals", "assumptions", "open_questions", "decision_journal"],
   "properties": {
-    "schema_version": {
-      "type": "string"
-    },
-    "as_of": {
-      "type": "string"
-    },
-    "household": {
-      "type": "object"
-    },
-    "income": {
-      "type": "object"
-    },
-    "expenses": {
-      "type": "object"
-    },
-    "assets": {
-      "type": "object"
-    },
-    "housing": {
-      "type": "object"
-    },
-    "debts": {
-      "type": "object"
-    },
-    "career": {
-      "type": "object"
-    },
-    "education": {
-      "type": "object"
-    },
-    "preferences": {
-      "type": "object"
-    },
-    "goals": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "assumptions": {
-      "type": "array"
-    },
-    "open_questions": {
-      "type": "array"
-    },
-    "decision_journal": {
-      "type": "array"
-    }
+    "schema_version": {"const": "1.4.0"},
+    "as_of": {"type": "string", "pattern": "^\\d{4}-\\d{2}(-\\d{2})?$"},
+    "family_state": {"$ref": "family-state.schema.json"},
+    "goals": {"type": "array", "items": {"type": "string"}},
+    "assumptions": {"type": "array"},
+    "open_questions": {"type": "array"},
+    "decision_journal": {"type": "array"},
+    "migration": {"type": "object"}
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

@@ -1,5 +1,34 @@
 # Result Integrity, Cross-Validation & Rollback
 
+## v1.4 全步骤自动复算
+
+INTEGRITY_GATE自动从当前step output生成运行时完整性结果，覆盖baseline、housing、financing、education、career、stress_test和options。调用者可以提交额外交叉证据，但系统取外部与运行时中的较弱状态。
+
+住房与融资多方案使用唯一option_id。压力测试如包含option_runs，需同时保存每个方案的decision_cashflow输入和结果；门禁会重新运行脚本并核对完整输出。OPTIONS_VALIDATE必须覆盖OPTIONS_BUILD全部ID，且与压力方案ID一致。
+
+STRESS_TEST和OPTIONS_VALIDATE属于关键步骤。缺少可复算字段为WARN或FAIL，实际公式不一致为FAIL并隔离。旧PASS无法跳过当前输出复算。
+
+多方案可复算字段：
+
+```text
+HOUSING_ANALYSIS.results.options[]:
+  option_id, pre_purchase_liquid_assets, cash_outlay, sale_net_inflow,
+  post_purchase_liquid_assets, old_home_price, target_home_price,
+  replacement_spread
+
+FINANCING_ANALYSIS.results.loans[]:
+  option_id + 对应融资完整性输入
+
+CAREER_ANALYSIS.integrity_inputs:
+  current_stable_income, reduced_main_income, new_income_sources,
+  resulting_stable_income
+
+STRESS_TEST.option_runs[]:
+  option_id, input（decision_cashflow输入）, result（脚本原始完整输出）
+```
+
+所有option_id必须与OPTIONS_BUILD.options[].id一致。不要只把人工总结或截断后的数字放入result；门禁需要原始结构重新运行。单方案旧结构仍可读取，但字段不足只能WARN，不能靠外部PASS升级。
+
 ## v1.3 修复
 
 校验结果必须有合法状态与证据；PASS 不接受空 cross_checks。记录绑定当前步骤输出的 SHA-256，输出变化后旧校验不能复用。WARN 即使遗漏原因也保持条件化，不能变成无条件 PASS。

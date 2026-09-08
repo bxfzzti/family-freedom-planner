@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Family Freedom Planner Workflow Orchestrator v1.1.
+"""Family Freedom Planner Workflow Orchestrator v1.4.
 
 A fail-closed control plane for step ordering, output validation,
 explicit skips, recommendation gating, and execution ledger.
@@ -99,6 +99,192 @@ def clear_gates(run):
             run["steps"][sid].update(status="PENDING", output=None, validation=None)
 
 
+def integrity_result(domain, checks, issues):
+    failed = [check for check in checks if check.get("pass") is not True]
+    all_issues = list(issues) + [f"runtime check failed: {x.get('name')}" for x in failed]
+    if all_issues:
+        status, confidence = "FAIL", "LOW"
+    elif not checks:
+        status, confidence = "WARN", "MEDIUM"
+        all_issues = ["no deterministic runtime check available"]
+    else:
+        status, confidence = "PASS", "HIGH"
+    return {"domain": domain, "cross_checks": checks,
+            "integrity": {"status": status, "confidence": confidence, "issues": all_issues}}
+
+
+def runtime_integrity_for_step(run, step_id):
+    module = _load_integrity_module()
+    output = run["steps"][step_id]["output"] or {}
+    if step_id == "BASELINE_CALCULATE":
+        metrics = output.get("derived_metrics", {})
+        result = module.validate("baseline", metrics)
+        needed = {"total_assets", "total_debt", "net_worth", "stable_income_annual",
+                  "annual_spend", "annual_surplus"}
+        missing = needed - set(metrics)
+        if missing and result["integrity"]["status"] != "FAIL":
+            result["integrity"] = {"status": "WARN", "confidence": "MEDIUM",
+                                   "issues": ["baseline identities incomplete: " + ", ".join(sorted(missing))]}
+        try:
+            import importlib.util
+            path = ROOT / "scripts" / "family_freedom_engine.py"
+            spec = importlib.util.spec_from_file_location("ffp_family_engine", path)
+            engine = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(engine)
+            state = run["steps"]["STATE_BUILD"]["output"]["family_state"]
+            expected = engine.baseline(state)
+            for key, value in expected.items():
+                actual = metrics.get(key)
+                if type(value) in (int, float):
+                    result["cross_checks"].append(
+                        module.check_close(f"state_to_baseline_{key}", actual, value, 1e-9)
+                        if type(actual) in (int, float)
+                        else {"name": f"state_to_baseline_{key}", "pass": False})
+                else:
+                    result["cross_checks"].append(
+                        {"name": f"state_to_baseline_{key}", "pass": actual == value,
+                         "expected": value, "actual": actual})
+            if any(check.get("pass") is not True for check in result["cross_checks"]):
+                result["integrity"] = {"status": "FAIL", "confidence": "LOW",
+                                       "issues": ["derived baseline does not match normalized family_state"]}
+        except (ValueError, KeyError, TypeError) as exc:
+            result["integrity"] = {"status": "FAIL", "confidence": "LOW",
+                                   "issues": [f"family_state cannot produce baseline: {exc}"]}
+        return result
+    if step_id == "HOUSING_ANALYSIS":
+        results = output.get("results", {})
+        options = results.get("options") or results.get("homes")
+        if not options:
+            return module.validate("housing", results)
+        checks, issues, ids = [], [], set()
+        for option in options:
+            oid = option.get("option_id")
+            if not isinstance(oid, str) or not oid or oid in ids:
+                issues.append("each housing option needs a unique option_id")
+                continue
+            ids.add(oid)
+            normalized = {
+                "pre_purchase_liquid_assets": option.get("pre_purchase_liquid_assets"),
+                "cash_outlay": option.get("cash_outlay"),
+                "sale_net_inflow": option.get("sale_net_inflow"),
+                "post_purchase_liquid_assets": option.get("post_purchase_liquid_assets"),
+                "old_home_price": option.get("old_home_price"),
+                "target_home_price": option.get("target_home_price"),
+                "replacement_spread": option.get("replacement_spread")}
+            check = module.validate("housing", normalized)
+            checks.extend([{**item, "option_id": oid} for item in check["cross_checks"]])
+            issues.extend([f"{oid}: {x}" for x in check["integrity"]["issues"]])
+            if len(check["cross_checks"]) < 2:
+                issues.append(f"{oid}: liquidity and replacement-spread checks are required")
+        return integrity_result("housing", checks, issues)
+    if step_id == "FINANCING_ANALYSIS":
+        results = output.get("results", {})
+        loans = results.get("loans")
+        if not loans:
+            return module.validate("financing", results)
+        checks, issues, ids = [], [], set()
+        for loan in loans:
+            oid = loan.get("option_id")
+            if not isinstance(oid, str) or not oid or oid in ids:
+                issues.append("each financing option needs a unique option_id")
+                continue
+            ids.add(oid)
+            check = module.validate("financing", loan)
+            checks.extend([{**item, "option_id": oid} for item in check["cross_checks"]])
+            issues.extend([f"{oid}: {x}" for x in check["integrity"]["issues"]])
+        return integrity_result("financing", checks, issues)
+    if step_id == "EDUCATION_ANALYSIS":
+        raw = output.get("education_scenarios", {})
+        normalized = {key: (value.get("annual") if isinstance(value, dict) else value)
+                      for key, value in raw.items()}
+        return module.validate("education", normalized)
+    if step_id == "CAREER_ANALYSIS":
+        inputs = output.get("integrity_inputs")
+        return module.validate("career", inputs or {})
+    if step_id == "STRESS_TEST":
+        checks, issues = [], []
+        scenarios = output.get("scenarios", {})
+        for name in ("NORMAL", "STRESS", "SEVERE"):
+            item = scenarios.get(name, {})
+            if all(finite_number(item.get(k)) for k in
+                   ("income_annual", "spending_annual", "annual_net_cashflow")):
+                expected = item["income_annual"] - item["spending_annual"]
+                checks.append({"name": f"{name}_annual_cashflow", "pass":
+                               math.isclose(item["annual_net_cashflow"], expected,
+                                            rel_tol=1e-9, abs_tol=0.01)})
+            else:
+                issues.append(f"{name}: missing finite annual cashflow inputs")
+        option_runs = output.get("option_runs")
+        if option_runs is not None:
+            if not isinstance(option_runs, list):
+                issues.append("option_runs must be a list")
+            else:
+                import importlib.util
+                path = ROOT / "scripts" / "decision_cashflow.py"
+                spec = importlib.util.spec_from_file_location("ffp_decision_cashflow", path)
+                cashflow = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(cashflow)
+                seen = set()
+                for item in option_runs:
+                    oid = item.get("option_id") if isinstance(item, dict) else None
+                    if not isinstance(oid, str) or not oid or oid in seen:
+                        issues.append("each stress option needs a unique option_id")
+                        continue
+                    seen.add(oid)
+                    try:
+                        expected = cashflow.simulate(item["input"])
+                    except (ValueError, KeyError, TypeError) as exc:
+                        issues.append(f"{oid}: cannot recompute: {exc}")
+                        continue
+                    actual = item.get("result")
+                    checks.append({"name": "cashflow_output_match", "option_id": oid,
+                                   "pass": actual == expected})
+        return integrity_result("stress_test", checks, issues)
+    if step_id == "OPTIONS_VALIDATE":
+        built = run["steps"]["OPTIONS_BUILD"]["output"] or {}
+        expected = {x["id"] for x in built.get("options", [])}
+        checks_by_id = {x.get("id"): x.get("pass") for x in output.get("option_checks", [])
+                        if isinstance(x, dict)}
+        checks = [{"name": "option_validation_coverage", "pass": set(checks_by_id) == expected},
+                  {"name": "all_option_checks_pass", "pass":
+                   bool(expected) and all(checks_by_id.get(oid) is True for oid in expected)}]
+        stress = run["steps"]["STRESS_TEST"]["output"] or {}
+        if stress.get("option_runs") is not None:
+            stress_ids = {x.get("option_id") for x in stress["option_runs"] if isinstance(x, dict)}
+            checks.append({"name": "stress_option_coverage", "pass": stress_ids == expected})
+        return integrity_result("options", checks, [])
+    raise WorkflowError(f"no runtime integrity implementation for {step_id}")
+
+
+def safe_runtime_integrity_for_step(run, step_id):
+    domains = {
+        "BASELINE_CALCULATE": "baseline", "HOUSING_ANALYSIS": "housing",
+        "FINANCING_ANALYSIS": "financing", "EDUCATION_ANALYSIS": "education",
+        "CAREER_ANALYSIS": "career", "STRESS_TEST": "stress_test",
+        "OPTIONS_VALIDATE": "options"}
+    try:
+        return runtime_integrity_for_step(run, step_id)
+    except (ValueError, KeyError, TypeError, AttributeError, OverflowError) as exc:
+        return integrity_result(domains.get(step_id, "unknown"), [],
+                                [f"runtime verification error: {exc}"])
+
+
+def combine_integrity(external, runtime):
+    severity = {"PASS": 0, "WARN": 1, "FAIL": 2}
+    statuses = [external["integrity"]["status"], runtime["integrity"]["status"]]
+    status = max(statuses, key=severity.get)
+    issues = list(external["integrity"]["issues"]) + list(runtime["integrity"]["issues"])
+    clean_external = {key: value for key, value in copy.deepcopy(external).items()
+                      if key not in ("runtime_verification", "external_evidence", "output_sha256")}
+    return {**clean_external,
+            "external_evidence": clean_external,
+            "runtime_verification": runtime,
+            "cross_checks": list(clean_external["cross_checks"]) + list(runtime["cross_checks"]),
+            "integrity": {"status": status,
+                          "confidence": {"PASS": "HIGH", "WARN": "MEDIUM", "FAIL": "LOW"}[status],
+                          "issues": issues}}
+
+
 def applicable(step, run):
     expr = step["applicability"]
     if expr == "always":
@@ -125,6 +311,24 @@ def prereqs_satisfied(step, run):
 
 
 def init_run(input_data):
+    if not isinstance(input_data, dict):
+        raise WorkflowError("workflow input must be an object")
+    allowed = {"run_id", "user_text", "selected_topics",
+               "requires_external_facts", "family_state"}
+    unknown = set(input_data) - allowed
+    if unknown:
+        raise WorkflowError(f"unknown v1.4 workflow input fields: {sorted(unknown)}")
+    if not isinstance(input_data.get("user_text"), str) or not input_data["user_text"].strip():
+        raise WorkflowError("user_text is required")
+    if input_data.get("family_state") is not None:
+        import importlib.util
+        path = ROOT / "scripts" / "validate_family_state.py"
+        spec = importlib.util.spec_from_file_location("ffp_input_state_validator", path)
+        validator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(validator)
+        result = validator.validate_state(input_data["family_state"], calculation_ready=False)
+        if result["status"] != "PASS":
+            raise WorkflowError("invalid input family_state: " + "; ".join(result["errors"]))
     wf = load_workflow()
     selected_topics = input_data.get("selected_topics") or route_topics(input_data.get("user_text",""))
     if not valid_topics(selected_topics):
@@ -138,7 +342,7 @@ def init_run(input_data):
             "user_text": input_data.get("user_text",""),
             "selected_topics": selected_topics,
             "requires_external_facts": bool(input_data.get("requires_external_facts", False)),
-            "known_context": input_data.get("known_context", {}),
+            "family_state": input_data.get("family_state"),
         },
         "steps": {},
         "ledger": [],
@@ -203,6 +407,16 @@ def validate_state_build(output, run):
         return False, "family_state must be object"
     if not isinstance(output["source_tags"], dict):
         return False, "source_tags must be object"
+    import importlib.util
+    path = ROOT / "scripts" / "validate_family_state.py"
+    spec = importlib.util.spec_from_file_location("ffp_family_state_validator", path)
+    validator = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(validator)
+    result = validator.validate_state(output["family_state"], calculation_ready=False)
+    if result["status"] != "PASS":
+        return False, "invalid v1.4 family_state: " + "; ".join(result["errors"])
+    if output["source_tags"] != output["family_state"]["source_tags"]:
+        return False, "source_tags must match family_state.source_tags"
     return True, "ok"
 
 
@@ -477,7 +691,8 @@ def record_integrity_result(run, step_id, result):
     expected_domain = {
         "BASELINE_CALCULATE": "baseline", "HOUSING_ANALYSIS": "housing",
         "FINANCING_ANALYSIS": "financing", "EDUCATION_ANALYSIS": "education",
-        "CAREER_ANALYSIS": "career"}.get(step_id)
+        "CAREER_ANALYSIS": "career", "STRESS_TEST": "stress_test",
+        "OPTIONS_VALIDATE": "options"}.get(step_id)
     if expected_domain and result.get("domain") != expected_domain:
         raise WorkflowError(f"{step_id} requires {expected_domain} integrity evidence")
     integrity = result["integrity"]
@@ -489,27 +704,7 @@ def record_integrity_result(run, step_id, result):
     if status == "PASS" and (not checks or integrity["issues"]
                             or not all(isinstance(x, dict) and x.get("pass") is True for x in checks)):
         raise WorkflowError("PASS requires successful nonempty cross-checks and no issues")
-    result = copy.deepcopy(result)
-    # Recompute available baseline identities from the actual stored output,
-    # rather than trusting an externally supplied PASS label.
-    if step_id == "BASELINE_CALCULATE":
-        metrics = run["steps"][step_id]["output"]["derived_metrics"]
-        runtime = _load_integrity_module().validate("baseline", metrics)
-        needed = {"total_assets", "total_debt", "net_worth", "stable_income_annual",
-                  "annual_spend", "annual_surplus"}
-        if needed - set(metrics) and runtime["integrity"]["status"] != "FAIL":
-            runtime["integrity"] = {
-                "status": "WARN", "confidence": "MEDIUM",
-                "issues": ["baseline identities incomplete: " + ", ".join(sorted(needed - set(metrics)))]}
-        result["runtime_verification"] = runtime
-        result["cross_checks"].extend(runtime["cross_checks"])
-        runtime_status = runtime["integrity"]["status"]
-        if runtime_status == "FAIL":
-            result["integrity"] = {
-                "status": "FAIL", "confidence": "LOW",
-                "issues": integrity["issues"] + runtime["integrity"]["issues"]}
-        elif runtime_status == "WARN" and status == "PASS":
-            result["integrity"] = runtime["integrity"]
+    result = combine_integrity(result, safe_runtime_integrity_for_step(run, step_id))
     if status in ("WARN", "FAIL") and not result["integrity"]["issues"]:
         result["integrity"]["issues"] = ["integrity check did not pass"]
     current_digest = output_digest(run["steps"][step_id]["output"])
@@ -542,6 +737,35 @@ def evaluate_integrity_gate(run):
     conditional=[]
     quarantined=[]
 
+    critical=["BASELINE_CALCULATE","STRESS_TEST","OPTIONS_VALIDATE"]
+    topics=set(run["context"].get("selected_topics",[]))
+    if topics.intersection({"HOUSING_EXISTING","HOUSING_FIRST_BUY"}):
+        critical.append("HOUSING_ANALYSIS")
+    if "FINANCING" in topics:
+        critical.append("FINANCING_ANALYSIS")
+    if "EDUCATION" in topics:
+        critical.append("EDUCATION_ANALYSIS")
+    if topics.intersection({"CAREER","SPOUSE_BREAK"}):
+        critical.append("CAREER_ANALYSIS")
+
+    # Recompute every critical completed step from the current stored output.
+    # Previously submitted evidence is combined at its weakest status.
+    for sid in critical:
+        if run["steps"][sid]["status"] != "COMPLETE":
+            continue
+        runtime = safe_runtime_integrity_for_step(run, sid)
+        prior = run.get("integrity_results", {}).get(sid)
+        external = prior.get("external_evidence") if isinstance(prior, dict) else None
+        if external:
+            combined = combine_integrity(external, runtime)
+        else:
+            combined = {**runtime, "external_evidence": None,
+                        "runtime_verification": runtime}
+        combined["output_sha256"] = output_digest(run["steps"][sid]["output"])
+        run.setdefault("integrity_results", {})[sid] = combined
+        if combined["integrity"]["status"] == "FAIL":
+            run["steps"][sid]["status"] = "QUARANTINED"
+
     # Any applicable completed domain step with explicit integrity FAIL is blocked.
     for sid, result in run.get("integrity_results",{}).items():
         status=result.get("integrity",{}).get("status")
@@ -554,22 +778,6 @@ def evaluate_integrity_gate(run):
             quarantined.append(sid)
         elif status=="WARN":
             conditional.extend([f"{sid}: {x}" for x in result.get("integrity",{}).get("issues",[])])
-
-    # Critical deterministic steps require an integrity result.
-    critical=["BASELINE_CALCULATE"]
-    topics=set(run["context"].get("selected_topics",[]))
-    if topics.intersection({"HOUSING_EXISTING","HOUSING_FIRST_BUY"}):
-        critical.append("HOUSING_ANALYSIS")
-    if "FINANCING" in topics:
-        critical.append("FINANCING_ANALYSIS")
-    if "EDUCATION" in topics:
-        critical.append("EDUCATION_ANALYSIS")
-    if topics.intersection({"CAREER","SPOUSE_BREAK"}):
-        critical.append("CAREER_ANALYSIS")
-
-    for sid in critical:
-        if run["steps"][sid]["status"]=="COMPLETE" and sid not in run.get("integrity_results",{}):
-            issues.append(f"missing integrity check for critical step {sid}")
 
     # External facts can cause conditional integrity.
     ext=run["steps"]["EXTERNAL_FACT_CHECK"]

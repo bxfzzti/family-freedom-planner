@@ -30,7 +30,7 @@ def demo():
     workflow.complete_step(run, "INTAKE_ROUTE", {
         "selected_topics": topics, "known_facts": {"example_only": True}, "missing_fields": []})
     workflow.complete_step(run, "STATE_BUILD", {
-        "family_state": state, "source_tags": {"all": "MODEL_ASSUMPTION"}})
+        "family_state": state, "source_tags": state["source_tags"]})
     workflow.complete_step(run, "INPUT_VALIDATE", {
         "status": "READY", "missing_p0": [], "conflicts": []})
     workflow.complete_step(run, "DEADLINE_IDENTIFY", {
@@ -63,6 +63,11 @@ def demo():
     transition_income = current_income - lost_income + new_income
     career = {
         "current_income_state": {"household": current_income, "high_risk": lost_income},
+        "integrity_inputs": {
+            "current_stable_income": current_income,
+            "reduced_main_income": lost_income,
+            "new_income_sources": new_income,
+            "resulting_stable_income": transition_income},
         "transition_scenarios": [
             {"name": "current", "income": current_income},
             {"name": "transition", "income": transition_income,

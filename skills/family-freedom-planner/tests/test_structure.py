@@ -1,4 +1,5 @@
 import re
+import json
 import unittest
 from pathlib import Path
 
@@ -45,6 +46,19 @@ class StructureTests(unittest.TestCase):
         self.assertTrue(paths)
         for rel in paths:
             self.assertTrue((ROOT / rel).exists(), rel)
+
+    def test_all_json_assets_and_examples_parse(self):
+        for directory in (ROOT / "assets", ROOT / "examples"):
+            for path in directory.rglob("*.json"):
+                with self.subTest(path=path):
+                    json.loads(path.read_text(encoding="utf-8"))
+
+    def test_schema_references_exist(self):
+        for path in (ROOT / "assets").glob("*.schema.json"):
+            data = json.loads(path.read_text(encoding="utf-8"))
+            for ref in re.findall(r'"\$ref"\s*:\s*"([^"]+)"', path.read_text()):
+                if "://" not in ref and not ref.startswith("#"):
+                    self.assertTrue((path.parent / ref).exists(), f"{path}: {ref}")
 
 
 if __name__ == "__main__":

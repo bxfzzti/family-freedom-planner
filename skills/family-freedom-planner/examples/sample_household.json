@@ -1,6 +1,11 @@
 {
+  "schema_version": "1.4.0",
   "as_of": "2026-09",
+  "currency": "CNY",
+  "amount_unit": "yuan",
   "income": {
+    "period": "annual",
+    "tax_basis": "AFTER_TAX",
     "stable_annual": {
       "adult_a_salary": 500000,
       "adult_b_salary": 130000,
@@ -9,18 +14,23 @@
     "high_risk_annual": 500000
   },
   "expenses": {
+    "period": "annual",
     "annual_total": 180000,
-    "annual_mandatory": 150000
+    "annual_mandatory": 150000,
+    "annual_total_includes_debt_payments": true
   },
   "assets": {
     "cash": 800000,
     "low_risk_investments": 0,
     "investments": 200000,
     "other_liquid": 0,
+    "unallocated_financial_assets": 0,
+    "other_non_liquid": 0,
     "real_estate": [
       {
-        "name": "current_home",
+        "id": "current_home",
         "market_value": 3500000,
+        "linked_debt_id": "current_home_financing",
         "linked_debt_balance": 1000000,
         "sellable_for_plan": true
       }
@@ -29,9 +39,27 @@
   "debts": {
     "items": [
       {
-        "name": "current_home_financing",
-        "balance": 1000000
+        "id": "current_home_financing",
+        "balance": 1000000,
+        "balance_basis": "CURRENT_BALANCE"
       }
     ]
+  },
+  "source_tags": {
+    "income.stable_annual.adult_a_salary": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "income.stable_annual.adult_b_salary": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "income.stable_annual.side_income": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "income.high_risk_annual": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "expenses.annual_total": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "expenses.annual_mandatory": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "assets.cash": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "assets.low_risk_investments": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "assets.investments": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "assets.other_liquid": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "assets.unallocated_financial_assets": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "assets.other_non_liquid": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "assets.real_estate.0.market_value": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "assets.real_estate.0.linked_debt_balance": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"},
+    "debts.items.0.balance": {"source_type": "MODEL_ASSUMPTION", "as_of": "2026-09", "confidence": "HIGH"}
   }
 }

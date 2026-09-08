@@ -87,6 +87,12 @@ class EngineTests(unittest.TestCase):
         state["income"].pop("high_risk_annual")
         self.assertIsNone(engine.baseline(state)["high_income_dependency"])
 
+    def test_before_tax_state_cannot_be_calculated(self):
+        state = json.loads((ROOT / "examples" / "sample_household.json").read_text())
+        state["income"]["tax_basis"] = "BEFORE_TAX"
+        with self.assertRaises(ValueError):
+            engine.baseline(state)
+
     def test_missing_refinance_is_not_safe(self):
         with self.assertRaises(ValueError):
             engine.refinance({})

@@ -1,6 +1,6 @@
 # 家庭重大决策规划助手 / Family Freedom Planner
 
-**v1.3.3 · 新会话自动触发 · 首轮行为门禁 · 跨模型实测**
+**v1.4.0 · 统一家庭状态 · 全步骤自动复算**
 
 
 **别焦虑，把不可控的未来，变成可判断的条件。**
@@ -50,7 +50,7 @@ Skill 路径是 skills/family-freedom-planner。
 本轮已完成10个案例、12轮实际回答的语义审阅（同一模型、独立上下文），
 原始回答见 [对话记录](skills/family-freedom-planner/evals/results/v1.3-dialogue-recordings.json)，
 判定依据见 [审阅证据](skills/family-freedom-planner/evals/results/v1.3-dialogue-reviews.json)。
-完整改动、122项脚本测试及验证边界见 [v1.3说明](RELEASE_v1.3.md)。
+v1.4完整改动、148项脚本测试及验证边界见 [v1.4说明](RELEASE_v1.4.md)。
 
 虚构完整演示（不保存文件、不联网）：
 
@@ -80,6 +80,22 @@ SKILL.md 和 intent-to-intake.md 后正确只问三个关键项。过程见
 [`跨模型自动触发记录`](skills/family-freedom-planner/evals/results/v1.3.2-cross-model-trigger-failure.md)。
 
 旧版 run.json 不直接沿用；家庭上下文可以继续使用，但需确认数据口径后重新初始化工作流。
+
+## v1.4 统一数据与自动复算
+
+- `family_state` 固定使用人民币元、年度收支、明确税前/税后和债务还款口径。
+- 每个关键数字带来源、日期和置信度；未知值不能写成0。
+- 旧0.9上下文通过 `migrate_context.py` 迁移，合并金融资产保持待拆分。
+- 控制器自动复算基线、每个住房方案、每笔融资、教育、职业、压力情景和方案覆盖。
+- 外部提交的PASS只能补充证据，不能覆盖运行时WARN或FAIL。
+
+```bash
+python skills/family-freedom-planner/scripts/validate_family_state.py \
+  skills/family-freedom-planner/examples/sample_household.json --calculation-ready
+
+python skills/family-freedom-planner/scripts/migrate_context.py \
+  skills/family-freedom-planner/examples/family-context-old.json
+```
 
 ## 仓库结构
 

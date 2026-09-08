@@ -1,7 +1,7 @@
 import importlib.util
 import unittest
 from pathlib import Path
-from workflow_fixtures import stress_scenarios
+from workflow_fixtures import baseline_output, state_build, stress_scenarios
 
 ROOT=Path(__file__).resolve().parents[1]
 P=ROOT/"scripts"/"workflow_orchestrator.py"
@@ -16,14 +16,13 @@ class IntegrityGateTests(unittest.TestCase):
         wo.record_integrity_result(run, "BASELINE_CALCULATE", self._pass_result())
         self.assertEqual(run["steps"]["BASELINE_CALCULATE"]["status"], "QUARANTINED")
 
-    def test_incomplete_numeric_basis_does_not_get_unconditional_pass(self):
+    def test_incomplete_baseline_is_quarantined_against_family_state(self):
         run = self._base_ready()
         metrics = run["steps"]["BASELINE_CALCULATE"]["output"]["derived_metrics"]
         metrics.pop("total_assets", None)
         metrics.pop("annual_surplus", None)
         wo.record_integrity_result(run, "BASELINE_CALCULATE", self._pass_result())
-        wo.evaluate_integrity_gate(run)
-        self.assertEqual(run["integrity_gate"]["status"], "CONDITIONAL_PASS")
+        self.assertEqual(run["steps"]["BASELINE_CALCULATE"]["status"], "QUARANTINED")
 
     def test_wrong_integrity_domain_rejected(self):
         result = self._pass_result()
@@ -86,17 +85,10 @@ class IntegrityGateTests(unittest.TestCase):
     def _base_ready(self):
         run=wo.init_run({"selected_topics":["GENERAL"],"user_text":"x"})
         wo.complete_step(run,"INTAKE_ROUTE",{"selected_topics":["GENERAL"],"known_facts":{},"missing_fields":[]})
-        wo.complete_step(run,"STATE_BUILD",{"family_state":{},"source_tags":{}})
+        wo.complete_step(run,"STATE_BUILD",state_build())
         wo.complete_step(run,"INPUT_VALIDATE",{"status":"READY","missing_p0":[],"conflicts":[]})
         wo.complete_step(run,"DEADLINE_IDENTIFY",{"deadlines":[],"deadline_collision":False})
-        wo.complete_step(run,"BASELINE_CALCULATE",{
-            "derived_metrics":{
-                "stable_income_annual":100,"annual_spend":50,"financial_assets":100,
-                "total_debt":0,"net_worth":100,"total_assets":100,"annual_surplus":50,"runway_months":24,
-                "high_income_dependency":0.5
-            },
-            "calculation_source":"REFERENCE_ENGINE"
-        })
+        wo.complete_step(run,"BASELINE_CALCULATE",baseline_output())
         wo.complete_step(run,"STRESS_TEST",{
             "scenarios":stress_scenarios(),
             "material_failures":[]
@@ -114,10 +106,22 @@ class IntegrityGateTests(unittest.TestCase):
         })
         return run
 
-    def test_missing_integrity_check_blocks(self):
+    def test_gate_runs_integrity_checks_automatically(self):
         run=self._base_ready()
         run=wo.evaluate_integrity_gate(run)
-        self.assertEqual(run["integrity_gate"]["status"],"BLOCKED")
+        self.assertEqual(run["integrity_gate"]["status"],"PASS")
+        for step in ("BASELINE_CALCULATE", "STRESS_TEST", "OPTIONS_VALIDATE"):
+            self.assertIn(step, run["integrity_results"])
+            self.assertEqual(run["integrity_results"][step]["integrity"]["status"], "PASS")
+
+    def test_repeated_gate_is_idempotent(self):
+        run = self._base_ready()
+        wo.evaluate_integrity_gate(run)
+        counts = {step: len(result["cross_checks"])
+                  for step, result in run["integrity_results"].items()}
+        wo.evaluate_integrity_gate(run)
+        self.assertEqual(counts, {step: len(result["cross_checks"])
+                                  for step, result in run["integrity_results"].items()})
 
     def test_integrity_pass_allows_recommendation(self):
         run=self._base_ready()

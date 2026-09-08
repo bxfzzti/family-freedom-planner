@@ -38,3 +38,19 @@ https://github.com/bxfzzti/family-freedom-planner
 ```
 
 家庭资料默认留在用户指定的私人位置，不随 Skill 提交到公开仓库。
+
+## v1.4 旧上下文升级
+
+旧的 `schema_version: 0.9` 文件先运行：
+
+```bash
+python scripts/migrate_context.py family-context.json
+```
+
+迁移结果会保留原数值，并把无法确定的税前税后、支出口径和金融资产组成列为待确认。确认后再运行：
+
+```bash
+python scripts/validate_family_state.py family-context-v1.4.json --calculation-ready
+```
+
+未通过 calculation-ready 时继续问诊，不得把未知值改成0后强行计算。v1.3及更早的 run.json 不能继续执行，需要从确认后的家庭状态重新初始化。

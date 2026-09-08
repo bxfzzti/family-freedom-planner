@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "family-state.schema.json",
+  "title": "Family Freedom Planner Normalized State v1.4",
+  "type": "object",
+  "required": ["schema_version", "as_of", "currency", "amount_unit", "income", "expenses", "assets", "debts", "source_tags"],
+  "properties": {
+    "schema_version": {"const": "1.4.0"},
+    "as_of": {"type": "string", "pattern": "^\\d{4}-\\d{2}(-\\d{2})?$"},
+    "currency": {"const": "CNY"},
+    "amount_unit": {"const": "yuan"},
+    "income": {
+      "type": "object",
+      "required": ["period", "tax_basis", "stable_annual", "high_risk_annual"],
+      "properties": {
+        "period": {"const": "annual"},
+        "tax_basis": {"enum": ["AFTER_TAX", "BEFORE_TAX", "UNKNOWN"]},
+        "stable_annual": {"type": "object", "additionalProperties": {"type": ["number", "null"], "minimum": 0}},
+        "high_risk_annual": {"type": ["number", "null"], "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "expenses": {
+      "type": "object",
+      "required": ["period", "annual_total", "annual_mandatory", "annual_total_includes_debt_payments"],
+      "properties": {
+        "period": {"const": "annual"},
+        "annual_total": {"type": ["number", "null"], "minimum": 0},
+        "annual_mandatory": {"type": ["number", "null"], "minimum": 0},
+        "annual_total_includes_debt_payments": {"type": ["boolean", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "assets": {
+      "type": "object",
+      "required": ["cash", "low_risk_investments", "investments", "other_liquid", "unallocated_financial_assets", "real_estate", "other_non_liquid"],
+      "properties": {
+        "cash": {"type": ["number", "null"], "minimum": 0},
+        "low_risk_investments": {"type": ["number", "null"], "minimum": 0},
+        "investments": {"type": ["number", "null"], "minimum": 0},
+        "other_liquid": {"type": ["number", "null"], "minimum": 0},
+        "unallocated_financial_assets": {"type": ["number", "null"], "minimum": 0},
+        "other_non_liquid": {"type": ["number", "null"], "minimum": 0},
+        "real_estate": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "market_value", "linked_debt_id", "linked_debt_balance", "sellable_for_plan"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "market_value": {"type": ["number", "null"], "minimum": 0},
+              "linked_debt_id": {"type": ["string", "null"]},
+              "linked_debt_balance": {"type": ["number", "null"], "minimum": 0},
+              "sellable_for_plan": {"type": ["boolean", "null"]}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "debts": {
+      "type": "object",
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "balance", "balance_basis"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "balance": {"type": ["number", "null"], "minimum": 0},
+              "balance_basis": {"enum": ["CURRENT_BALANCE", "ORIGINAL_PRINCIPAL", "UNKNOWN"]}
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "household": {"type": "object"},
+    "career": {"type": "object"},
+    "education": {"type": "object"},
+    "housing": {"type": "object"},
+    "preferences": {"type": "object"},
+    "deadlines": {"type": "array"},
+    "primary_decision": {"type": ["string", "null"]},
+    "source_tags": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["source_type", "as_of", "confidence"],
+        "properties": {
+          "source_type": {"enum": ["USER_EXACT", "USER_ESTIMATE", "EXTERNAL_PRIMARY", "EXTERNAL_SECONDARY", "MODEL_ASSUMPTION", "DERIVED"]},
+          "as_of": {"type": "string", "pattern": "^\\d{4}-\\d{2}(-\\d{2})?$"},
+          "confidence": {"enum": ["HIGH", "MEDIUM", "LOW"]}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
