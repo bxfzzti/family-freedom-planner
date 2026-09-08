@@ -1,0 +1,28 @@
+{
+  "example_only": true,
+  "initial_low_risk_assets": 1200000,
+  "upfront_net_inflow": 0,
+  "upfront_outflow": 800000,
+  "protected_reserve": 200000,
+  "horizon_months": 36,
+  "scenarios": {
+    "NORMAL": {
+      "income_annual": 450000,
+      "spending_annual": 330000,
+      "changes": [],
+      "one_off_expenses": []
+    },
+    "STRESS": {
+      "income_annual": 450000,
+      "spending_annual": 330000,
+      "changes": [{"month": 13, "income_annual": 210000}],
+      "one_off_expenses": []
+    },
+    "SEVERE": {
+      "income_annual": 450000,
+      "spending_annual": 330000,
+      "changes": [{"month": 13, "income_annual": 0}],
+      "one_off_expenses": [{"month": 18, "amount": 100000}]
+    }
+  }
+}

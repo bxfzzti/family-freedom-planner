@@ -1,71 +1,37 @@
-# Copy-to-Agent 安装话术
+# 安装与首次使用
 
-把仓库 URL 中的占位符换成真实 GitHub 地址即可。
-
-## 通用版：推荐
+将下面整段复制给能访问 GitHub 的 Agent。不同客户端的安装位置和生效方式不同，以实际安装结果为准。
 
 ```text
-请安装或加载这个 GitHub 仓库里的 Agent Skill：
+请安装这个仓库中的 family-freedom-planner Skill：
+https://github.com/bxfzzti/family-freedom-planner
+目录：skills/family-freedom-planner
 
-https://github.com/OWNER/family-freedom-planner
+如果支持持久安装，请使用当前客户端的安装机制安装整个 Skill 目录。
+若不能安装但能读取仓库，请读取 SKILL.md，并按需读取其 references 或运行 scripts。
+请明确告诉我：是已持久安装还是仅本轮读取；脚本能否运行；当前事实能否联网核实。
+不要把仅本轮读取说成已安装，不要在未验证时声称以后会自动调用。
 
-Skill 路径：
-skills/family-freedom-planner
-
-Skill 名称：
-family-freedom-planner
-
-如果你的环境原生支持 Agent Skills，请把这个 Skill 安装到你的 Skills 目录并在以后相关任务中自动使用。
-
-如果你的环境不能自动安装 Skill，请直接读取：
-skills/family-freedom-planner/SKILL.md
-
-然后只在任务需要时继续读取它引用的 references/、examples/，或运行 scripts/family_freedom_engine.py；不要一次性加载所有文件。
-
-以后当我讨论家庭资产、买房卖房、房产置换、孩子教育、一方脱产、职业转型、降低工作强度、提前还贷、抵押融资或家庭长期规划时，优先使用这个 Skill。
-
-现在先按这个 Skill 的“自然语言首次问诊”开始：先理解我一句话描述的问题，自动选择最多 3 个相关模块并预填已知信息，只让我补真正缺失的关键项。不要让我研究模块或填复杂表格。
+下面是虚构的启动测试，不是我的家庭资料：
+“我30岁，两个孩子，想换房，但担心35岁后工作不稳。”
+请按 Skill 回答第一轮；保留已知信息，说明待验证矛盾，最多问三个关键项。
 ```
 
-## 极简版
+## 安装验收
+
+- 已安装：报告实际安装位置，以及客户端是否需要刷新或新开会话；只陈述已验证的状态。
+- 仅本轮读取：可以继续本轮使用，新会话可能需要再次提供入口。
+- 脚本不可运行：明确计算未由脚本验证，避免给出伪精确购买上限。
+- 无法访问仓库：不要凭名称假装加载；需由用户提供完整技能包或可访问内容。
+- 首轮不重复问年龄和孩子数量，不把35岁当成确定失业期限，不直接劝买卖，不发长表。
+- 启动测试中的家庭信息不得保存为用户事实；测试完成后从用户真实问题开始。
+
+## 已有规划
 
 ```text
-安装/加载这个 Agent Skill：
-https://github.com/OWNER/family-freedom-planner
-路径 skills/family-freedom-planner
-
-以后我的家庭住房、教育、职业和资产重大决策优先用它。
-现在按 SKILL.md 的首次问诊开始。
+请加载 family-freedom-planner，读取我提供的 family-context.json。
+只提取这次变化并重算受影响结果，不重新首次问诊。
+保留其中的事实/估计/假设标签。先说明旧结论如何受影响。
 ```
 
-## 已经支持 GitHub Skill Installer 的 Agent
-
-```text
-请从 GitHub 安装 OWNER/family-freedom-planner 仓库中
-skills/family-freedom-planner 路径的 Skill。
-安装后使用 family-freedom-planner 开始首次问诊。
-```
-
-## Agent 不支持 Skills，但能读 GitHub
-
-```text
-把这个 GitHub 仓库当成一个可执行的专家工作流。
-先读 skills/family-freedom-planner/SKILL.md。
-严格遵守它的触发条件和核心原则；
-只在需要时读取 references/ 和 examples/；
-确定性计算优先运行 scripts/family_freedom_engine.py。
-```
-
-
-## 已有家庭规划数据时
-
-```text
-请先加载 family-freedom-planner。
-
-如果我提供了 family-context.json，
-把它视为当前家庭规划的显式 source of truth。
-
-不要重新首次问诊。
-先识别我这次提供的新信息和旧状态相比发生了什么变化，
-只重算受影响的指标和建议。
-```
+家庭资料默认留在用户指定的私人位置，不随 Skill 提交到公开仓库。

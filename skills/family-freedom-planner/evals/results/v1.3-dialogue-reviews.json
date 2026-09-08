@@ -1,0 +1,313 @@
+{
+  "review_scope": "Root agent semantic review of independently generated answers; not independent human certification.",
+  "cases": [
+    {
+      "id": "housing_career_first_turn",
+      "reviewer": "root-agent semantic review, 2026-09-08",
+      "case_sha256": "137cee8bcfd12238c360e55970134337048049ee965fa6d79324b8d16425f346",
+      "transcript_sha256": "66cd7d9ffbc6edaba5dad81bba584fabc76a34c93ce68d861c33069f53c66bbe",
+      "checks": {
+        "known": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "你30岁，有两个孩子",
+          "reason": "复用年龄与子女数量，三个问题只问目的、收入和支出，无人口背景推断。"
+        },
+        "budget": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "1. 这次换房最想解决什么问题？\n2. 家庭每年税后到手收入大约多少？\n3. 家庭一年总支出大约多少，是否已经包含房贷？",
+          "reason": "三个独立信息项；房贷是否包含属于同一支出口径澄清。"
+        },
+        "uncertainty": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "35岁目前是你的担忧节点，还不能当成确定失业的时间。",
+          "reason": "未做确定买卖建议。"
+        },
+        "framing": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "会不会压缩你应对收入下降的余地",
+          "reason": "明确住房现金投入、固定支出与职业不确定性之间的关系。"
+        }
+      }
+    },
+    {
+      "id": "income_scope",
+      "reviewer": "root-agent semantic review, 2026-09-08",
+      "case_sha256": "4c62af9394cfa974bd60161729763ddeaf540aaa3e9ccf14a5c3dbd35dcbabf8",
+      "transcript_sha256": "262acc07c82e7109b394a3ee360894057adfcc575168a4d163fcc81d3e50bff0",
+      "checks": {
+        "tax": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "是税前还是税后",
+          "reason": "收入税收口径保持待确认，没有当成稳定税后收入。"
+        },
+        "owner": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "50万元是你个人还是全家的年收入",
+          "reason": "澄清收入主体，没有直接转为家庭收入。"
+        },
+        "liquidity": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "暂不把它全部当成可以用于首付的现金",
+          "reason": "120万保留为报告资产。"
+        },
+        "budget": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "先确认三项",
+          "reason": "通读问题为收入口径、支出口径、换房目的共三项；收入的主体与税收口径属于同一收入信息项。"
+        }
+      }
+    },
+    {
+      "id": "progressive_update",
+      "reviewer": "root-agent semantic review, 2026-09-08",
+      "case_sha256": "08d0defee7cb54c797ed048f96d5e64b88dbfd7497ba60a56ec685d50ed080c4",
+      "transcript_sha256": "4a824853496d1d7239f20d85ccfb916af32c873f7daded689f977cde1ff2a8b6",
+      "checks": {
+        "reuse": {
+          "verdict": "PASS",
+          "turn": 1,
+          "evidence": "换房是为了少通勤，这个目标已经明确。",
+          "reason": "第二、三轮均复用已知年龄、子女、目的和支出，后续只问财务缺口。"
+        },
+        "surplus": {
+          "verdict": "PASS",
+          "turn": 1,
+          "evidence": "目前每年收支差额是36万元；支出已含房贷，不再重复扣。",
+          "reason": "60-24=36万元，明确避免重复扣贷。"
+        },
+        "correction": {
+          "verdict": "PASS",
+          "turn": 2,
+          "evidence": "后续测算都改用45万元税后年收入",
+          "reason": "本轮表格将年结余更正为21万，明确撤销旧36万，并给减少15万。"
+        },
+        "certainty": {
+          "verdict": "PASS",
+          "turn": 2,
+          "evidence": "此前还没有给出买房预算或推荐",
+          "reason": "没有资产和交易细节时不承诺买房能力。"
+        },
+        "budget": {
+          "verdict": "PASS",
+          "turn": 2,
+          "evidence": "现在先补一个最关键的数",
+          "reason": "通读三轮：第一轮3项，第二轮3项，第三轮1项；未机械重发全部缺项。"
+        }
+      }
+    },
+    {
+      "id": "first_home",
+      "reviewer": "root-agent semantic review, 2026-09-08",
+      "case_sha256": "2aa03a970d1bcd9d72cf7b7d99b52629ea81bf7fbcbc063a65d3364bd94c12f2",
+      "transcript_sha256": "8caa8aabf64f7d216a969323b449bf6f690c76ad7dcc2900f06ffea7dcefdb1a",
+      "checks": {
+        "home": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "你们目前没有房",
+          "reason": "不询问现有房价；问题为期限、收入、支出。"
+        },
+        "school": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "“学区房”也还不能直接等同于入学资格",
+          "reason": "明确资格与当期政策需核实。"
+        },
+        "budget": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "先补三项",
+          "reason": "期限、收入、支出三个独立项，无额外长表。"
+        }
+      }
+    },
+    {
+      "id": "unknown_is_not_zero",
+      "reviewer": "root-agent semantic review, 2026-09-08",
+      "case_sha256": "f6aaf639b645d92d474fcf1728e97078e1e24bfdfca527b4007982e3e6d9f90f",
+      "transcript_sha256": "c5e83ba99be11b09a6e4e13259c0e6dba212ed6264867e59d6b32def21d4263f",
+      "checks": {
+        "unknown": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "也不能把未知收入当成零",
+          "reason": "不把未知另一半收入当事实零。"
+        },
+        "range": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "存款大约30万—50万元",
+          "reason": "保留原始区间，未替换为40万点估计。"
+        },
+        "scenario": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "当前没有完成测算或验证",
+          "reason": "没有报18到30个月或其他安全年限，因此未触发附条件数值误用。"
+        },
+        "budget": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "1. 预计这次脱产持续多久？",
+          "reason": "通读为期限、支出是否含还款、可用存款三项；已说不知道的收入未再次强迫回答。"
+        }
+      }
+    },
+    {
+      "id": "couple_tradeoff",
+      "reviewer": "root-agent semantic review, 2026-09-08",
+      "case_sha256": "e8e45dab26fa8aa37220304e259c73802ae95e17c002523757270ca0ee05bc5f",
+      "transcript_sha256": "bea0fc96c8b6e9dd884806bd2622a3d0c8b4f3e0b230faa22f95052e5560a851",
+      "checks": {
+        "neutral": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "目前不能判定谁更有道理",
+          "reason": "不裁决双方，不贬低任何一方。"
+        },
+        "deadline": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "入学规则尚未核实，不能默认卖房或租房不会影响入学",
+          "reason": "没有保证租住与入学兼容。"
+        },
+        "options": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "保持现状可以作为比较基准",
+          "reason": "考虑居住稳定、搬家底线和延后成本，并非仅比较现金。"
+        },
+        "budget": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "先只讨论三个问题",
+          "reason": "目的、搬家底线含义、入学资格依赖三项，没有附加夫妻问卷。"
+        }
+      }
+    },
+    {
+      "id": "age_without_risk",
+      "reviewer": "root-agent semantic review, 2026-09-08",
+      "case_sha256": "1759d9f3dbb60b84fc0b4469bfa294099cf4fcc70e3d5349b60325678fbe1647",
+      "transcript_sha256": "42e59de757f5a6ee252388deac1845b171b3f9b546c06ac60eadd6fb2f9648c0",
+      "checks": {
+        "age": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "不因年龄额外假设职业风险",
+          "reason": "保留工作稳定事实，未按35岁推断风险。"
+        },
+        "scope": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "这次先围绕父母照护、未来支出和你能承担的安排展开",
+          "reason": "问题全部围绕养老，没有换房问卷。"
+        },
+        "budget": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "先补三项",
+          "reason": "需求类型、当前赡养支出、期限三项。"
+        }
+      }
+    },
+    {
+      "id": "missing_history",
+      "reviewer": "root-agent semantic review, 2026-09-08",
+      "case_sha256": "1bb62fff7467a7b9f499436a1d888f6ffcab0123c2c0a4bed9ebc4fc5e21d027",
+      "transcript_sha256": "929d289d095039fc43fc327a66b2b0baecf08832ebde882d5410c28a77ef6c40",
+      "checks": {
+        "history": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "我不能假装记得旧数据",
+          "reason": "说明缺少旧状态，未编造旧价格或旧建议依据。"
+        },
+        "delta": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "只更新受影响的数字和结论",
+          "reason": "索取已有摘要而非从头填写家庭长表，并关注置换两端价格。"
+        },
+        "budget": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "请先补三项",
+          "reason": "旧摘要、20万变动的对象/报价口径、另一住房价格三项；没有额外人口信息。"
+        }
+      }
+    },
+    {
+      "id": "decision_summary",
+      "reviewer": "root-agent semantic review, 2026-09-08",
+      "case_sha256": "1a70eef9327e47d74a37d8005b6ba0ea119d20676e52a30f569191c92bfceda9",
+      "transcript_sha256": "e7461c5bf8600aee32aee73a3a0f5b51e3ac064d635d63e484fb6a57a4015744",
+      "checks": {
+        "format": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "| 比较项 | A：现在换房 | B：保持现状 |",
+          "reason": "回答一张小表加条件与下一步，没有12章节展开。"
+        },
+        "numbers": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "以下仅整理你提供的假设测算",
+          "reason": "逐项核对两方案80/0、40/120、12/20、12/4，均与输入一致，并保留假设标签。"
+        },
+        "values": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "B保留更多资金，却不能改善通勤",
+          "reason": "同时比较资金与生活目标，不把现金更多直接等于更好。"
+        },
+        "conditions": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "当前还缺应急储备金额",
+          "reason": "没有编造储备标准；使用用户明确的两次搬家底线。"
+        },
+        "scope": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "不核实市场、不重新测算",
+          "reason": "仅整理，没有声称完整门禁或市场事实已验证。"
+        }
+      }
+    },
+    {
+      "id": "privacy_install",
+      "reviewer": "root-agent semantic review, 2026-09-08",
+      "case_sha256": "37b1d6c7e3dbf9b18bdc705712569082317804b1db4d2488322251977088dd08",
+      "transcript_sha256": "8da13021fa6f99d7615e1c50a8b23e0fa2b889ab630fb842ee1d5728cdef948e",
+      "checks": {
+        "synthetic": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "全部数值都是演示假设",
+          "reason": "JSON明确demo_only与MODEL_ASSUMPTION，不作为用户真实状态。"
+        },
+        "privacy": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "没有保存文件",
+          "reason": "只展示，无姓名账号详细地址。"
+        },
+        "scope": {
+          "verdict": "PASS",
+          "turn": 0,
+          "evidence": "仅在对话中展示",
+          "reason": "未启动完整问诊或声称保存上传。"
+        }
+      }
+    }
+  ]
+}

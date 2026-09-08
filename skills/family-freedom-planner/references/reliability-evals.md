@@ -1,5 +1,7 @@
 # Reliability & Evaluation Policy
 
+当前测试分层与实际对话流程见 ../evals/DIALOGUE_EVAL.md。validate_benchmark.py 只检查案例结构与覆盖，不运行 Agent，不得据此宣称实际回答通过。发布结果必须报告被测模型、Skill 版本、运行来源，以及未评估范围。
+
 v1.0 的目标不是“让 Skill 能回答更多问题”，而是：
 
 > **让它面对不同家庭时，不轻易套错模板、不制造伪精确、不因为措辞变化就给出相反判断。**

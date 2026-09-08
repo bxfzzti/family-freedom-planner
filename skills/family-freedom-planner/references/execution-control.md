@@ -1,5 +1,13 @@
 # Execution Control & Recommendation Gate
 
+## v1.3 运行兼容性
+
+运行记录绑定工作流版本与内容 hash。旧版本 run.json 需使用已确认的原始家庭输入重新初始化，不沿用旧步骤的 COMPLETE 或 PASS。
+
+STRESS_TEST 的每个情景须提供 income_annual、spending_annual、annual_net_cashflow 与 assumptions；只有 NORMAL/STRESS/SEVERE 空对象不算完成。单位为元/年，现金流必须等于收入减支出。OPTIONS_VALIDATE 需覆盖每个方案，不能用空列表声称全部通过。
+
+仓库演示可直接运行 scripts/demo_controlled_run.py，不写文件，使用虚构数据。它实际计算并执行完整性门禁；政策未联网验证，因此最终保持 CONDITIONAL_PASS。
+
 v1.1 将“应该按顺序分析”升级为运行时强制执行。
 
 ## 核心原则
@@ -162,7 +170,7 @@ python scripts/workflow_orchestrator.py next /tmp/run.json
 python scripts/workflow_orchestrator.py complete \
   /tmp/run.json \
   STATE_BUILD \
-  examples/step_outputs/state_build.json
+  examples/execution_step_outputs/state_build.json
 ```
 
 运行 Recommendation Gate：
@@ -176,7 +184,7 @@ python scripts/workflow_orchestrator.py gate /tmp/run.json
 ```bash
 python scripts/workflow_orchestrator.py finalize \
   /tmp/run.json \
-  examples/final_output.json
+  examples/final_output_conditional.json
 ```
 
 ---

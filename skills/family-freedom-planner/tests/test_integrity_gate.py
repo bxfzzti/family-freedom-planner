@@ -1,6 +1,7 @@
 import importlib.util
 import unittest
 from pathlib import Path
+from workflow_fixtures import stress_scenarios
 
 ROOT=Path(__file__).resolve().parents[1]
 P=ROOT/"scripts"/"workflow_orchestrator.py"
@@ -8,6 +9,58 @@ spec=importlib.util.spec_from_file_location("wo2",P)
 wo=importlib.util.module_from_spec(spec); spec.loader.exec_module(wo)
 
 class IntegrityGateTests(unittest.TestCase):
+    def test_finalize_rechecks_changed_output(self):
+        run = self._base_ready()
+        wo.record_integrity_result(run, "BASELINE_CALCULATE", self._pass_result())
+        wo.evaluate_integrity_gate(run)
+        wo.evaluate_gate(run)
+        run["steps"]["BASELINE_CALCULATE"]["output"]["derived_metrics"]["net_worth"] = 9
+        with self.assertRaises(wo.WorkflowError):
+            wo.finalize(run, {"final_output_mode": "NORMAL", "decision_summary": "unsafe"})
+
+    def _pass_result(self):
+        return {"domain": "baseline", "cross_checks": [{"name": "identity", "pass": True}],
+                "integrity": {"status": "PASS", "confidence": "HIGH", "issues": []}}
+
+    def test_empty_result_rejected(self):
+        with self.assertRaises(wo.WorkflowError):
+            wo.record_integrity_result(self._base_ready(), "BASELINE_CALCULATE", {})
+
+    def test_pass_requires_actual_checks(self):
+        result = self._pass_result()
+        result["cross_checks"] = []
+        with self.assertRaises(wo.WorkflowError):
+            wo.record_integrity_result(self._base_ready(), "BASELINE_CALCULATE", result)
+
+    def test_recalculation_invalidates_previous_integrity(self):
+        run = self._base_ready()
+        wo.record_integrity_result(run, "BASELINE_CALCULATE", self._pass_result())
+        output = run["steps"]["BASELINE_CALCULATE"]["output"]
+        wo.rollback_steps(run, ["BASELINE_CALCULATE"], "new input")
+        self.assertNotIn("BASELINE_CALCULATE", run["integrity_results"])
+        self.assertIn("BASELINE_CALCULATE", wo.next_steps(run)["available"])
+        self.assertEqual(run["steps"]["STRESS_TEST"]["status"], "STALE")
+        wo.complete_step(run, "BASELINE_CALCULATE", output)
+        self.assertNotIn("BASELINE_CALCULATE", run["integrity_results"])
+
+    def test_changed_output_cannot_reuse_integrity(self):
+        run = self._base_ready()
+        wo.record_integrity_result(run, "BASELINE_CALCULATE", self._pass_result())
+        run["steps"]["BASELINE_CALCULATE"]["output"]["derived_metrics"]["net_worth"] = 9
+        wo.evaluate_integrity_gate(run)
+        self.assertEqual(run["integrity_gate"]["status"], "BLOCKED")
+
+    def test_new_failure_revokes_previous_gate(self):
+        run = self._base_ready()
+        wo.record_integrity_result(run, "BASELINE_CALCULATE", self._pass_result())
+        wo.evaluate_integrity_gate(run)
+        wo.evaluate_gate(run)
+        result = self._pass_result()
+        result["integrity"] = {"status": "FAIL", "confidence": "LOW", "issues": ["corrected"]}
+        wo.record_integrity_result(run, "BASELINE_CALCULATE", result)
+        with self.assertRaises(wo.WorkflowError):
+            wo.finalize(run, {"final_output_mode": "NORMAL", "decision_summary": "unsafe"})
+
     def _base_ready(self):
         run=wo.init_run({"selected_topics":["GENERAL"],"user_text":"x"})
         wo.complete_step(run,"INTAKE_ROUTE",{"selected_topics":["GENERAL"],"known_facts":{},"missing_fields":[]})
@@ -23,7 +76,7 @@ class IntegrityGateTests(unittest.TestCase):
             "calculation_source":"REFERENCE_ENGINE"
         })
         wo.complete_step(run,"STRESS_TEST",{
-            "scenarios":{"NORMAL":{},"STRESS":{},"SEVERE":{}},
+            "scenarios":stress_scenarios(),
             "material_failures":[]
         })
         wo.complete_step(run,"OPTIONS_BUILD",{

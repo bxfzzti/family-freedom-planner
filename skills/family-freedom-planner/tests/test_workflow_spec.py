@@ -7,6 +7,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 class WorkflowSpecTests(unittest.TestCase):
+    def test_hash_binds_actual_content(self):
+        compiled = json.loads((ROOT / "assets" / "workflow.compiled.json").read_text())
+        expected = compiled.pop("spec_hash")
+        actual = hashlib.sha256(json.dumps(
+            compiled, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        self.assertEqual(expected, actual)
+
     def test_yaml_and_compiled_hash_match(self):
         compiled = json.loads((ROOT/"assets"/"workflow.compiled.json").read_text(encoding="utf-8"))
         yaml_text = (ROOT/"workflow.yaml").read_text(encoding="utf-8")

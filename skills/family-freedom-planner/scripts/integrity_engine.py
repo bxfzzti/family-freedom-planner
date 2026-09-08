@@ -143,6 +143,36 @@ def summarize(checks, issues):
 
 
 def validate(domain, data):
+    numeric_fields = {
+        "baseline": ("total_assets", "total_debt", "net_worth",
+                     "stable_income_annual", "annual_spend", "annual_surplus"),
+        "housing": ("pre_purchase_liquid_assets", "cash_outlay", "sale_net_inflow",
+                    "post_purchase_liquid_assets", "old_home_price",
+                    "target_home_price", "replacement_spread", "transaction_costs"),
+        "financing": ("principal_due_or_current_balance", "confirmed_refinance_amount",
+                      "safely_available_for_debt", "refinance_gap"),
+        "education": ("BASE", "MID", "HIGH"),
+        "career": ("current_stable_income", "reduced_main_income",
+                   "new_income_sources", "resulting_stable_income"),
+    }
+    signed = {"net_worth", "annual_surplus", "replacement_spread",
+              "post_purchase_liquid_assets"}
+    input_issues = []
+    if not isinstance(data, dict):
+        input_issues.append("result must be an object")
+    else:
+        for key in numeric_fields.get(domain, ()):
+            if key not in data:
+                if domain == "financing":
+                    input_issues.append(f"missing required financing value: {key}")
+                continue
+            value = data[key]
+            if (type(value) not in (int, float) or not math.isfinite(value)
+                    or (key not in signed and value < 0)):
+                input_issues.append(f"invalid numeric value: {key}")
+    if input_issues:
+        return {"domain": domain, "cross_checks": [],
+                "integrity": summarize([], input_issues)}
     if domain=="baseline":
         checks=validate_baseline(data)
         issues=[]

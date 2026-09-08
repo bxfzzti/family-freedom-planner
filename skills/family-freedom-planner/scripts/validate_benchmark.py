@@ -53,6 +53,8 @@ def validate(path):
         errors.append("need at least 3 invariance cases")
 
     return {
+        "evaluation_scope": "case_schema_and_coverage_only",
+        "agent_responses_evaluated": False,
         "case_count": len(cases),
         "unique_ids": len(ids),
         "unique_risk_tags": len(risk_tags),

@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import math
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -47,7 +48,18 @@ def save_json(path, data):
 
 
 def load_workflow():
-    return load_json(WORKFLOW_PATH)
+    workflow = load_json(WORKFLOW_PATH)
+    content = {key: value for key, value in workflow.items() if key != "spec_hash"}
+    if workflow.get("spec_hash") != output_digest(content):
+        raise WorkflowError("workflow content does not match spec_hash")
+    return workflow
+
+
+def ensure_run_spec(run):
+    workflow = load_workflow()
+    if (run.get("workflow_spec_hash") != workflow["spec_hash"]
+            or run.get("workflow_version") != workflow["version"]):
+        raise WorkflowError("run uses an older/different workflow; initialize a new run from confirmed inputs")
 
 
 def step_map(workflow):
@@ -55,26 +67,36 @@ def step_map(workflow):
 
 
 def route_topics(user_text):
-    # Transparent fallback router. Semantic agents may provide selected_topics directly.
-    rules = {
-        "HOUSING_EXISTING": ["换房","卖房","改善","学区房","置换","现有房","房价"],
-        "HOUSING_FIRST_BUY": ["首套","首次购房","第一次买房","还没买房","没有房"],
-        "EDUCATION": ["学区","上学","教育","小学","幼儿园","国际学校","留学"],
-        "CAREER": ["大厂","离职","退休","40岁","工作不稳","裁员","职业转型","副业","降低工作强度"],
-        "SPOUSE_BREAK": ["全职带娃","不上班","辞职带娃","脱产","在家带孩子"],
-        "FINANCING": ["抵押贷","经营贷","续贷","提前还贷","利率","月供","按揭"],
-        "PARENT_CARE": ["父母养老","赡养","父母医疗","护理"],
-        "RELOCATION": ["回县城","回老家","换城市","移居","小城市"],
-        "INVESTING": ["股票","基金","理财","投资亏损","资产配置"]
-    }
-    scores = []
-    for topic, words in rules.items():
-        hits = [w for w in words if w in user_text]
-        if hits:
-            scores.append((len(hits), topic, hits))
-    scores.sort(key=lambda x: (-x[0], x[1]))
-    selected = [x[1] for x in scores[:3]]
-    return selected or ["GENERAL"]
+    # One shared candidate router prevents CLI and Agent entrypoints drifting.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "ffp_intake_router", ROOT / "scripts" / "intake_router.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.route(user_text)["selected_topics"]
+
+
+def valid_topics(topics):
+    allowed = {"GENERAL", "HOUSING_EXISTING", "HOUSING_FIRST_BUY", "EDUCATION",
+               "CAREER", "SPOUSE_BREAK", "FINANCING", "PARENT_CARE", "RELOCATION", "INVESTING"}
+    return (isinstance(topics, list) and 1 <= len(topics) <= 3
+            and all(isinstance(t, str) and t in allowed for t in topics)
+            and len(set(topics)) == len(topics))
+
+
+def output_digest(output):
+    import hashlib
+    return hashlib.sha256(json.dumps(
+        output, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+        allow_nan=False).encode("utf-8")).hexdigest()
+
+
+def clear_gates(run):
+    run["gate"] = None
+    run["integrity_gate"] = None
+    for sid in ("INTEGRITY_GATE", "RECOMMENDATION_GATE", "FINALIZE"):
+        if sid in run["steps"]:
+            run["steps"][sid].update(status="PENDING", output=None, validation=None)
 
 
 def applicable(step, run):
@@ -94,6 +116,7 @@ def applicable(step, run):
 
 
 def prereqs_satisfied(step, run):
+    ensure_run_spec(run)
     for req in step["requires"]:
         status = run["steps"][req]["status"]
         if status not in ("COMPLETE", "SKIPPED"):
@@ -104,6 +127,8 @@ def prereqs_satisfied(step, run):
 def init_run(input_data):
     wf = load_workflow()
     selected_topics = input_data.get("selected_topics") or route_topics(input_data.get("user_text",""))
+    if not valid_topics(selected_topics):
+        raise WorkflowError("selected_topics must contain 1..3 unique known topics")
     run = {
         "workflow_version": wf["version"],
         "workflow_spec_hash": wf["spec_hash"],
@@ -149,6 +174,8 @@ def init_run(input_data):
 
 
 def require_keys(output, keys):
+    if not isinstance(output, dict):
+        raise WorkflowError("step output must be an object")
     missing = [k for k in keys if k not in output]
     if missing:
         raise WorkflowError(f"missing required output keys: {missing}")
@@ -158,10 +185,16 @@ def _nonempty_list(value):
     return isinstance(value, list) and len(value) > 0
 
 
+def finite_number(value):
+    return type(value) in (int, float) and math.isfinite(value)
+
+
 # ---------- validators ----------
 def validate_intake_route(output, run):
-    if not _nonempty_list(output["selected_topics"]):
-        return False, "selected_topics must not be empty"
+    if not valid_topics(output["selected_topics"]):
+        return False, "invalid selected_topics"
+    if set(output["selected_topics"]) != set(run["context"]["selected_topics"]):
+        return False, "topics changed; initialize a new run with corrected domains"
     return True, "ok"
 
 
@@ -200,6 +233,14 @@ def validate_baseline(output, run):
     missing = [k for k in required if k not in d]
     if missing:
         return False, f"baseline missing metrics: {missing}"
+    for key in required:
+        value = d[key]
+        if value is None and key in ("runway_months", "high_income_dependency"):
+            continue
+        if not finite_number(value) or (key != "net_worth" and value < 0):
+            return False, f"invalid baseline metric: {key}"
+    if d["high_income_dependency"] is not None and d["high_income_dependency"] > 1:
+        return False, "high_income_dependency must be in 0..1 or null"
     if output["calculation_source"] not in ("REFERENCE_ENGINE","VERIFIED_TOOL"):
         return False, "critical baseline must come from deterministic/verified calculation"
     return True, "ok"
@@ -269,6 +310,21 @@ def validate_stress(output, run):
     for key in ("NORMAL","STRESS","SEVERE"):
         if key not in scenarios:
             return False, f"stress test missing {key}"
+        scenario = scenarios[key]
+        if not isinstance(scenario, dict):
+            return False, f"{key} must be an object"
+        for metric in ("income_annual", "spending_annual", "annual_net_cashflow"):
+            if not finite_number(scenario.get(metric)):
+                return False, f"{key} needs a finite {metric}"
+        if scenario["income_annual"] < 0 or scenario["spending_annual"] < 0:
+            return False, f"{key} income/spending cannot be negative"
+        expected = scenario["income_annual"] - scenario["spending_annual"]
+        if not math.isclose(scenario["annual_net_cashflow"], expected, rel_tol=1e-9, abs_tol=0.01):
+            return False, f"{key} annual cashflow identity failed"
+        if not isinstance(scenario.get("assumptions"), list):
+            return False, f"{key} assumptions must be explicit"
+    if not isinstance(output["material_failures"], list):
+        return False, "material_failures must be a list"
     return True, "ok"
 
 
@@ -290,6 +346,17 @@ def validate_options_validate(output, run):
         return False, "option_checks must be list"
     if output["all_options_validated"] is True and output["critical_errors"]:
         return False, "validated options cannot have critical errors"
+    built = run["steps"]["OPTIONS_BUILD"]["output"] or {}
+    expected = {x["id"] for x in built.get("options", [])}
+    checks = output["option_checks"]
+    if not all(isinstance(x, dict) and isinstance(x.get("id"), str)
+               and type(x.get("pass")) is bool for x in checks):
+        return False, "each option check needs id and boolean pass"
+    actual = [x["id"] for x in checks]
+    if len(actual) != len(set(actual)) or set(actual) != expected:
+        return False, "option checks must cover every built option exactly once"
+    if output["all_options_validated"] is True and any(not x["pass"] for x in checks):
+        return False, "failed option cannot be marked fully validated"
     return True, "ok"
 
 
@@ -328,7 +395,7 @@ def complete_step(run, step_id, output):
             raise WorkflowError(f"{step_id} validation failed: {name}: {detail}")
 
     state["status"] = "COMPLETE"
-    state["output"] = output
+    state["output"] = copy.deepcopy(output)
     state["validation"] = validation_results
     state["order"] = len(run["ledger"]) + 1
     run["ledger"].append({
@@ -349,6 +416,7 @@ def complete_step(run, step_id, output):
 
 
 def manual_skip(run, step_id, reason):
+    ensure_run_spec(run)
     wf = load_workflow()
     steps = step_map(wf)
     if step_id not in steps:
@@ -365,13 +433,14 @@ def manual_skip(run, step_id, reason):
 
 
 def next_steps(run):
+    ensure_run_spec(run)
     wf = load_workflow()
     available = []
     blocked = []
     for step in wf["steps"]:
         sid = step["id"]
         status = run["steps"][sid]["status"]
-        if status != "PENDING":
+        if status not in ("PENDING", "STALE"):
             continue
         if step.get("system_managed"):
             continue
@@ -388,8 +457,30 @@ def next_steps(run):
 
 
 def record_integrity_result(run, step_id, result):
+    ensure_run_spec(run)
     if step_id not in run["steps"]:
         raise WorkflowError(f"unknown step for integrity: {step_id}")
+    if run["steps"][step_id]["status"] != "COMPLETE":
+        raise WorkflowError("integrity results require a completed current step")
+    if not isinstance(result, dict) or not isinstance(result.get("integrity"), dict):
+        raise WorkflowError("missing integrity result")
+    integrity = result["integrity"]
+    status = integrity.get("status")
+    checks = result.get("cross_checks")
+    if (status not in ("PASS", "WARN", "FAIL") or not isinstance(checks, list)
+            or not isinstance(integrity.get("issues"), list)):
+        raise WorkflowError("invalid integrity status/checks/issues")
+    if status == "PASS" and (not checks or integrity["issues"]
+                            or not all(isinstance(x, dict) and x.get("pass") is True for x in checks)):
+        raise WorkflowError("PASS requires successful nonempty cross-checks and no issues")
+    result = copy.deepcopy(result)
+    if status in ("WARN", "FAIL") and not result["integrity"]["issues"]:
+        result["integrity"]["issues"] = ["integrity check did not pass"]
+    current_digest = output_digest(run["steps"][step_id]["output"])
+    if result.get("output_sha256", current_digest) != current_digest:
+        raise WorkflowError("integrity result refers to a different output")
+    result["output_sha256"] = current_digest
+    clear_gates(run)
     run.setdefault("integrity_results", {})[step_id] = result
     run["ledger"].append({
         "order": len(run["ledger"]) + 1,
@@ -418,6 +509,10 @@ def evaluate_integrity_gate(run):
     # Any applicable completed domain step with explicit integrity FAIL is blocked.
     for sid, result in run.get("integrity_results",{}).items():
         status=result.get("integrity",{}).get("status")
+        if result.get("output_sha256") != output_digest(run["steps"][sid]["output"]):
+            issues.append(f"stale integrity check for {sid}")
+        if status not in ("PASS", "WARN", "FAIL"):
+            issues.append(f"invalid integrity status for {sid}")
         if status=="FAIL":
             issues.extend([f"{sid}: {x}" for x in result.get("integrity",{}).get("issues",[])])
             quarantined.append(sid)
@@ -477,19 +572,25 @@ def evaluate_integrity_gate(run):
 
 
 def rollback_steps(run, step_ids, reason):
+    ensure_run_spec(run)
+    if not isinstance(step_ids, list) or any(sid not in run["steps"] for sid in step_ids):
+        raise WorkflowError("rollback requires a list of known step ids")
+    # Traverse actual workflow dependencies, not only the caller's partial list.
+    targets = set(step_ids)
+    changed = True
+    while changed:
+        changed = False
+        for step in load_workflow()["steps"]:
+            if step["id"] not in targets and targets.intersection(step["requires"]):
+                targets.add(step["id"])
+                changed = True
     affected=[]
-    for sid in step_ids:
-        if sid not in run["steps"]:
-            continue
+    for sid in sorted(targets):
+        run.get("integrity_results", {}).pop(sid, None)
         if run["steps"][sid]["status"] in ("COMPLETE","QUARANTINED"):
             run["steps"][sid]["status"]="STALE"
             affected.append(sid)
-    run["gate"]=None
-    run["integrity_gate"]=None
-    for sid in ("INTEGRITY_GATE","RECOMMENDATION_GATE","FINALIZE"):
-        if sid in run["steps"] and run["steps"][sid]["status"]!="SKIPPED":
-            run["steps"][sid]["status"]="PENDING"
-            run["steps"][sid]["output"]=None
+    clear_gates(run)
     run["ledger"].append({
         "order":len(run["ledger"])+1,
         "step":"SYSTEM",
@@ -519,6 +620,8 @@ def evaluate_gate(run):
         reasons.append(f"Integrity Gate blocked: {integrity_gate.get('issues', [])}")
     elif integrity_gate.get("status") == "CONDITIONAL_PASS":
         conditional.extend(integrity_gate.get("conditional_constraints", []))
+    elif integrity_gate.get("status") != "PASS":
+        reasons.append("Integrity Gate has an invalid status")
 
     # Every applicable non-system pre-gate step must be complete.
     for step in wf["steps"]:
@@ -531,6 +634,8 @@ def evaluate_gate(run):
             reasons.append(f"applicable step {sid} is {status}")
 
     iv = run["steps"]["INPUT_VALIDATE"]["output"] or {}
+    if iv.get("status") == "BLOCKED":
+        reasons.append("input validation is BLOCKED")
     unresolved_p0 = list(iv.get("missing_p0", []))
     conflicts = list(iv.get("conflicts", []))
     if conflicts:
@@ -586,6 +691,11 @@ def finalize(run, output):
     gate = run.get("gate")
     if not gate:
         raise WorkflowError("Recommendation Gate has not run")
+    # Re-evaluate freshness immediately before delivery, even if a cached gate
+    # passed before an input/result was edited.
+    evaluate_integrity_gate(run)
+    evaluate_gate(run)
+    gate = run["gate"]
     if gate["status"] not in ("PASS","CONDITIONAL_PASS"):
         raise WorkflowError(f"cannot finalize: gate is {gate['status']}")
     if gate["status"] == "CONDITIONAL_PASS":

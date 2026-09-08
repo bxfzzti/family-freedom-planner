@@ -33,6 +33,25 @@ class IntakeRouterTests(unittest.TestCase):
         result = router.route("帮我看看我们家未来几年整体安全吗")
         self.assertEqual(result["selected_topics"], ["GENERAL"])
 
+    def test_age_alone_is_not_career_risk(self):
+        result = router.route("我35岁，想安排父母养老")
+        self.assertNotIn("CAREER", result["selected_topics"])
+
+    def test_first_home_school_district(self):
+        result = router.route("我们没有房，准备买首套学区房")
+        self.assertIn("HOUSING_FIRST_BUY", result["selected_topics"])
+        self.assertIn("EDUCATION", result["selected_topics"])
+        self.assertNotIn("HOUSING_EXISTING", result["selected_topics"])
+
+    def test_previous_no_home_does_not_override_current_home(self):
+        result = router.route("以前没有房，现在已有房，想换学区房")
+        self.assertIn("HOUSING_EXISTING", result["selected_topics"])
+
+    def test_invalid_budget(self):
+        for limit in (0, -1, 4, 1.5, True):
+            with self.subTest(limit=limit), self.assertRaises(ValueError):
+                router.route("想换房", limit)
+
 
 if __name__ == "__main__":
     unittest.main()

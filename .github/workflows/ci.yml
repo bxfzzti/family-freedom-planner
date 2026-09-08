@@ -19,3 +19,9 @@ jobs:
         run: |
           python skills/family-freedom-planner/scripts/validate_benchmark.py \
             skills/family-freedom-planner/evals/benchmark_cases.json
+      - name: Validate recorded dialogue evidence (no model calls)
+        run: |
+          python skills/family-freedom-planner/scripts/evaluate_dialogues.py \
+            skills/family-freedom-planner/evals/dialogue_cases.json \
+            skills/family-freedom-planner/evals/results/v1.3-dialogue-recordings.json \
+            skills/family-freedom-planner/evals/results/v1.3-dialogue-reviews.json

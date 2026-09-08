@@ -1,13 +1,25 @@
 {
   "scenarios": {
     "NORMAL": {
-      "summary": "income and financing assumptions hold"
+      "summary": "income and financing assumptions hold",
+      "income_annual": 630000,
+      "spending_annual": 180000,
+      "annual_net_cashflow": 450000,
+      "assumptions": ["Synthetic example: current income remains unchanged"]
     },
     "STRESS": {
-      "summary": "income down, housing spread worsens"
+      "summary": "income down, housing spread worsens",
+      "income_annual": 380000,
+      "spending_annual": 180000,
+      "annual_net_cashflow": 200000,
+      "assumptions": ["Synthetic example: main income declines by 250000"]
     },
     "SEVERE": {
-      "summary": "high income ends early"
+      "summary": "high income ends early",
+      "income_annual": 130000,
+      "spending_annual": 180000,
+      "annual_net_cashflow": -50000,
+      "assumptions": ["Synthetic example: main income becomes zero"]
     }
   },
   "material_failures": [

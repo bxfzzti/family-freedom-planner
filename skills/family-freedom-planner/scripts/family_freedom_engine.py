@@ -8,38 +8,69 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 from typing import Any
 
 
-def n(value: Any, default: float = 0.0) -> float:
-    if value is None:
-        return default
-    return float(value)
+def n(value: Any, default: float | None = None, *, allow_negative=False) -> float:
+    if value is None and default is not None:
+        value = default
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError("expected a known numeric amount; unknown is not zero")
+    value = float(value)
+    if not math.isfinite(value) or (value < 0 and not allow_negative):
+        raise ValueError("amount must be finite and non-negative")
+    return value
+
+
+def mapping(value, label):
+    if not isinstance(value, dict):
+        raise ValueError(f"{label} must be an explicit object")
+    return value
+
+
+def records(value, label):
+    if not isinstance(value, list) or not all(isinstance(x, dict) for x in value):
+        raise ValueError(f"{label} must be an explicit list of objects; use [] if none")
+    return value
 
 
 def mortgage_payment(principal: float, annual_rate: float, years: float) -> float:
     principal, annual_rate, years = n(principal), n(annual_rate), n(years)
     if principal < 0 or annual_rate < 0 or years <= 0:
         raise ValueError("principal/rate must be non-negative; years must be positive")
-    months = int(round(years * 12))
+    months = int(round(n(years * 12)))
+    if months < 1 or not math.isclose(years * 12, months, rel_tol=0, abs_tol=1e-7):
+        raise ValueError("term must contain a positive whole number of months")
     if annual_rate == 0:
         return principal / months
     r = annual_rate / 12
-    factor = (1 + r) ** months
-    return principal * r * factor / (factor - 1)
+    if r == 0:
+        return principal / months
+    denominator = -math.expm1(-months * math.log1p(r))
+    return n(principal * (r / denominator))
 
 
 def baseline(state: dict) -> dict:
-    income = state.get("income", {})
-    expenses = state.get("expenses", {})
-    assets = state.get("assets", {})
-    debts = state.get("debts", {})
+    mapping(state, "state")
+    income = mapping(state.get("income"), "income")
+    expenses = mapping(state.get("expenses"), "expenses")
+    assets = mapping(state.get("assets"), "assets")
+    debts = mapping(state.get("debts"), "debts")
+    stable = mapping(income.get("stable_annual"), "income.stable_annual")
+    homes = records(assets.get("real_estate"), "assets.real_estate")
+    debt_items = records(debts.get("items"), "debts.items")
 
-    stable_income = sum(n(v) for v in income.get("stable_annual", {}).values())
-    high_risk_income = n(income.get("high_risk_annual"))
+    stable_income = sum(n(v) for v in stable.values())
+    high_risk_income = (None if income.get("high_risk_annual") is None
+                        else n(income["high_risk_annual"]))
+    if high_risk_income is not None and high_risk_income > stable_income:
+        raise ValueError("high_risk_annual is a subset of stable_annual, not additional income")
     annual_spend = n(expenses.get("annual_total"))
     mandatory = n(expenses.get("annual_mandatory"), annual_spend)
+    if mandatory > annual_spend:
+        raise ValueError("mandatory spending cannot exceed total spending")
 
     cash = n(assets.get("cash"))
     low_risk = n(assets.get("low_risk_investments"))
@@ -47,24 +78,27 @@ def baseline(state: dict) -> dict:
     other_liquid = n(assets.get("other_liquid"))
     financial_assets = cash + low_risk + investments + other_liquid
 
-    real_estate_value = sum(n(x.get("market_value")) for x in assets.get("real_estate", []))
-    total_assets = financial_assets + real_estate_value + n(assets.get("other_non_liquid"))
-    total_debt = sum(n(x.get("balance")) for x in debts.get("items", []))
+    real_estate_value = sum(n(x.get("market_value")) for x in homes)
+    total_assets = financial_assets + real_estate_value + n(assets.get("other_non_liquid", 0))
+    total_debt = sum(n(x.get("balance")) for x in debt_items)
     net_worth = total_assets - total_debt
 
     annual_surplus = stable_income - annual_spend
     monthly_mandatory = mandatory / 12 if mandatory > 0 else 0
     runway = None if monthly_mandatory <= 0 else (cash + low_risk) / monthly_mandatory
-    dependency = None if stable_income <= 0 else min(max(high_risk_income / stable_income, 0), 1)
+    dependency = (None if stable_income <= 0 or high_risk_income is None
+                  else high_risk_income / stable_income)
 
     locked_equity = 0.0
-    for home in assets.get("real_estate", []):
-        if not home.get("sellable_for_plan", True):
+    lock_known = all(type(home.get("sellable_for_plan")) is bool for home in homes)
+    for home in homes:
+        if home.get("sellable_for_plan") is False:
             locked_equity += max(
                 0.0,
                 n(home.get("market_value")) - n(home.get("linked_debt_balance"))
             )
-    lock_ratio = None if net_worth <= 0 else min(max(locked_equity / net_worth, 0), 1)
+    lock_ratio = (None if net_worth <= 0 or not lock_known
+                  else min(max(locked_equity / net_worth, 0), 1))
 
     return {
         "stable_income_annual": stable_income,
@@ -78,6 +112,9 @@ def baseline(state: dict) -> dict:
         "total_debt": total_debt,
         "net_worth": net_worth,
         "runway_months": runway,
+        "runway_basis": "zero_income_mandatory_spending_coverage",
+        "mandatory_spending_basis": ("user_provided" if expenses.get("annual_mandatory") is not None
+                                     else "annual_total_conservative_fallback"),
         "high_income_dependency": dependency,
         "property_lock_ratio": lock_ratio,
     }
@@ -89,7 +126,9 @@ def sell_and_rent(case: dict) -> dict:
     tx = n(case.get("transaction_costs"))
     monthly_rent = n(case["monthly_rent"])
     wait_years = n(case["wait_years"])
-    low_risk_return = n(case.get("low_risk_return"))
+    low_risk_return = n(case.get("low_risk_return"), allow_negative=True)
+    if low_risk_return <= -1:
+        raise ValueError("low_risk_return must be greater than -1")
     loan_rate = n(case.get("current_home_loan_rate"))
     friction = n(case.get("moving_and_other_friction"))
 
@@ -145,7 +184,7 @@ def read_json(path: str) -> dict:
 
 
 def dump(data: dict) -> None:
-    print(json.dumps(data, ensure_ascii=False, indent=2))
+    print(json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 def main() -> None:
@@ -180,4 +219,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (ValueError, KeyError, TypeError, OSError, OverflowError) as exc:
+        print(json.dumps({"status": "ERROR", "error": str(exc)}, ensure_ascii=False))
+        raise SystemExit(2)

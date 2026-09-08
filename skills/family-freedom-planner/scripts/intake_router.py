@@ -21,7 +21,7 @@ RULES = {
         "学区", "上学", "小学", "幼儿园", "初中", "高中", "教育", "国际学校", "留学"
     ],
     "CAREER": [
-        "大厂", "离职", "退休", "40岁", "35岁", "工作不稳", "裁员",
+        "大厂", "离职", "退休", "工作不稳", "裁员",
         "职业转型", "副业", "降低工作强度", "自由职业"
     ],
     "SPOUSE_BREAK": [
@@ -48,6 +48,8 @@ PRIORITY = [
 
 
 def route(text: str, max_topics: int = 3):
+    if type(max_topics) is not int or not 1 <= max_topics <= 3:
+        raise ValueError("max_topics must be an integer from 1 to 3")
     scores = {}
     matched = {}
     for topic, words in RULES.items():
@@ -55,6 +57,14 @@ def route(text: str, max_topics: int = 3):
         if hits:
             scores[topic] = len(hits)
             matched[topic] = hits
+
+    # A school-district purchase does not imply an existing property. Suppress
+    # weak existing-home hits only; explicit conflicting statements still need
+    # the Agent's semantic review rather than a guessed timeline.
+    first_home = any(w in text for w in ("首套", "首次购房", "第一次买房", "没有房", "还没买房"))
+    existing_home = any(w in text for w in ("已有房", "现有房", "换房", "卖房", "置换"))
+    if first_home and not existing_home:
+        scores.pop("HOUSING_EXISTING", None)
 
     # Avoid treating ordinary "贷款" as a separate first-round topic when housing
     # is already selected unless financing is explicit.

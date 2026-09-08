@@ -1,6 +1,6 @@
 # 家庭重大决策规划助手 / Family Freedom Planner
 
-**v1.2.0 · Execution-Controlled + Integrity-Checked Agent Skill**
+**v1.3.0 · 渐进问诊 · 一页决策摘要 · 可追溯评估**
 
 
 **别焦虑，把不可控的未来，变成可判断的条件。**
@@ -23,15 +23,49 @@
 
 ```text
 请安装或加载这个 GitHub 仓库里的 family-freedom-planner Agent Skill。
+https://github.com/bxfzzti/family-freedom-planner
 Skill 路径是 skills/family-freedom-planner。
 
 如果你的环境支持 Agent Skills，请把它安装到你的 Skills 目录；
 如果不支持自动安装，就直接阅读 SKILL.md，并按需读取 references/ 和运行 scripts/。
 
-安装/加载后，先使用它的首次问诊先根据我的一句自然语言问题自动选择相关模块，并自动预填已经知道的信息；不要让我自己研究模块，也不要让我填复杂表格。
+请说明是已持久安装还是仅本轮读取，以及脚本能否运行。
+根据我的一句自然语言问题识别已知事实与待验证矛盾，每轮最多问三个关键项；不要让我研究模块或填长表。
 ```
 
 更完整的复制话术见 [`INSTALL_PROMPT.md`](INSTALL_PROMPT.md)。
+
+## v1.3 使用体验
+
+- 先明确决策目的、时间和不可接受的代价，再逐步补财务缺口。
+- 收入的税前税后、个人与家庭口径不擅自转换；职业担忧不当成确定失业日期。
+- 默认一页摘要：方案条件、现金影响、生活代价、暂停线和下一步。详细测算按需展开。
+- 夫妻已有分歧时及时比较共同目标与底线；纳入保持现状、延后和可逆试行。
+- 安装后用虚构案例检查首次回复；本轮读取不等于以后自动生效。
+
+评估分为脚本单元测试、38个案例的结构校验、10个实际对话案例的语义评估。
+**结构校验 PASS 不代表 Agent 实际回答通过。** 实际对话的采集与审阅方法见
+[`DIALOGUE_EVAL.md`](skills/family-freedom-planner/evals/DIALOGUE_EVAL.md)；没有运行记录与审阅证据的案例标为未评估。
+
+本轮已完成10个案例、12轮实际回答的语义审阅（同一模型、独立上下文），
+原始回答见 [对话记录](skills/family-freedom-planner/evals/results/v1.3-dialogue-recordings.json)，
+判定依据见 [审阅证据](skills/family-freedom-planner/evals/results/v1.3-dialogue-reviews.json)。
+完整改动、101项脚本测试及验证边界见 [v1.3说明](RELEASE_v1.3.md)。
+
+虚构完整演示（不保存文件、不联网）：
+
+```bash
+python skills/family-freedom-planner/scripts/demo_controlled_run.py
+```
+
+按月现金流示例：
+
+```bash
+python skills/family-freedom-planner/scripts/decision_cashflow.py \
+  skills/family-freedom-planner/examples/decision_cashflow_case.json
+```
+
+旧版 run.json 不直接沿用；家庭上下文可以继续使用，但需确认数据口径后重新初始化工作流。
 
 ## 仓库结构
 
@@ -95,6 +129,8 @@ API 可以以后作为企业集成选项，而不是使用本项目的前提。
 
 
 ## v0.7.1：自适应首次问诊
+
+以下是历史版本能力记录；当前问诊预算与交互以 v1.3 的 SKILL.md 和 intent-to-intake.md 为准。模块为内部组织方式，不要求用户选择或整表填写。
 
 首次问诊不再假设所有用户都有同样的问题。
 

@@ -81,5 +81,32 @@ class IntegrityEngineTests(unittest.TestCase):
         r=ie.invalidate_downstream(["a"],g)
         self.assertEqual(r,["b","c","d"])
 
+    def test_empty_financing_is_not_pass(self):
+        self.assertNotEqual(ie.validate("financing", {})["integrity"]["status"], "PASS")
+
+    def test_null_financing_is_not_zero(self):
+        data = {"principal_due_or_current_balance": None,
+                "confirmed_refinance_amount": 0,
+                "safely_available_for_debt": 0, "refinance_gap": 0}
+        self.assertEqual(ie.validate("financing", data)["integrity"]["status"], "FAIL")
+
+    def test_nonfinite_numbers_fail_without_crash(self):
+        for value in (float("nan"), float("inf"), True, "100"):
+            with self.subTest(value=value):
+                result = ie.validate("baseline", {
+                    "total_assets": value, "total_debt": 0, "net_worth": 100})
+                self.assertEqual(result["integrity"]["status"], "FAIL")
+
+    def test_negative_financing_fails(self):
+        data = {"principal_due_or_current_balance": -1,
+                "confirmed_refinance_amount": 0,
+                "safely_available_for_debt": 0, "refinance_gap": 0}
+        self.assertEqual(ie.validate("financing", data)["integrity"]["status"], "FAIL")
+
+    def test_negative_net_worth_is_valid(self):
+        result = ie.validate("baseline", {
+            "total_assets": 100, "total_debt": 200, "net_worth": -100})
+        self.assertEqual(result["integrity"]["status"], "PASS")
+
 if __name__=="__main__":
     unittest.main()

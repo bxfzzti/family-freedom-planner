@@ -2,6 +2,7 @@ import importlib.util
 import json
 import unittest
 from pathlib import Path
+from workflow_fixtures import stress_scenarios
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "workflow_orchestrator.py"
@@ -22,6 +23,60 @@ def base_input(topics=None, external=False):
 
 
 class ExecutionControlTests(unittest.TestCase):
+    def test_old_workflow_run_requires_reinitialization(self):
+        run = wo.init_run(base_input())
+        run["workflow_version"] = "1.2.0"
+        with self.assertRaises(wo.WorkflowError):
+            wo.next_steps(run)
+
+    def test_empty_scenarios_do_not_count_as_stress_test(self):
+        valid, _ = wo.validate_stress({
+            "scenarios": {"NORMAL": {}, "STRESS": {}, "SEVERE": {}},
+            "material_failures": []}, {})
+        self.assertFalse(valid)
+
+    def test_stress_cashflow_identity_checked(self):
+        scenarios = stress_scenarios()
+        scenarios["SEVERE"]["annual_net_cashflow"] = 999
+        valid, _ = wo.validate_stress({"scenarios": scenarios, "material_failures": []}, {})
+        self.assertFalse(valid)
+
+    def test_nonfinite_baseline_rejected(self):
+        valid, _ = wo.validate_baseline({
+            "derived_metrics": {
+                "stable_income_annual": float("nan"), "annual_spend": 1,
+                "financial_assets": 1, "total_debt": 0, "net_worth": 1,
+                "runway_months": 12, "high_income_dependency": 0},
+            "calculation_source": "REFERENCE_ENGINE"}, {})
+        self.assertFalse(valid)
+
+    def test_orchestrator_uses_same_router(self):
+        self.assertNotIn("CAREER", wo.route_topics("我40岁，想安排父母养老"))
+        self.assertNotIn("HOUSING_EXISTING", wo.route_topics("我们没有房，买首套学区房"))
+
+    def test_unknown_topic_rejected(self):
+        with self.assertRaises(wo.WorkflowError):
+            wo.init_run(base_input(["TYPO"]))
+
+    def test_intake_cannot_silently_change_selected_domains(self):
+        run = wo.init_run(base_input(["GENERAL"]))
+        with self.assertRaises(wo.WorkflowError):
+            wo.complete_step(run, "INTAKE_ROUTE", {
+                "selected_topics": ["FINANCING"], "known_facts": {}, "missing_fields": []})
+
+    def test_empty_option_checks_cannot_claim_validated(self):
+        run = self._run_to_options()
+        valid, _ = wo.validate_options_validate({
+            "all_options_validated": True, "critical_errors": [], "option_checks": []}, run)
+        self.assertFalse(valid)
+
+    def test_failed_check_cannot_claim_validated(self):
+        run = self._run_to_options()
+        valid, _ = wo.validate_options_validate({
+            "all_options_validated": True, "critical_errors": [],
+            "option_checks": [{"id": "A", "pass": True}, {"id": "B", "pass": False}]}, run)
+        self.assertFalse(valid)
+
     def test_illegal_jump_blocked(self):
         run = wo.init_run(base_input())
         with self.assertRaises(wo.WorkflowError):
@@ -171,7 +226,7 @@ class ExecutionControlTests(unittest.TestCase):
                 "conditionalized_if_unverified":False if external_verified else True
             })
         wo.complete_step(run, "STRESS_TEST", {
-            "scenarios":{"NORMAL":{},"STRESS":{},"SEVERE":{}},
+            "scenarios":stress_scenarios(),
             "material_failures":[]
         })
         wo.complete_step(run, "OPTIONS_BUILD", {
