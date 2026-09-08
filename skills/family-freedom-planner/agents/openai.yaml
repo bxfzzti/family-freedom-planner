@@ -1,0 +1,6 @@
+interface:
+  display_name: "家庭重大决策规划助手"
+  short_description: "先问清关键条件，再分析住房、职业与家庭现金流"
+  default_prompt: "使用 $family-freedom-planner；资料不足时只复述已知情况、说明矛盾并最多问三个关键项。"
+policy:
+  allow_implicit_invocation: true

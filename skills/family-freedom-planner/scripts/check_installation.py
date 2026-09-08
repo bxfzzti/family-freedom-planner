@@ -17,7 +17,7 @@ def check(root=ROOT):
     root = Path(root).resolve()
     issues = []
     required = [
-        "SKILL.md", "workflow.yaml", "assets/workflow.compiled.json",
+        "SKILL.md", "agents/openai.yaml", "workflow.yaml", "assets/workflow.compiled.json",
         "scripts/family_freedom_engine.py", "scripts/workflow_orchestrator.py",
         "scripts/integrity_engine.py", "scripts/intake_router.py",
         "scripts/decision_cashflow.py", "scripts/state_diff.py"]
