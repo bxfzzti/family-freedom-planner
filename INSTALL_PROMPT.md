@@ -1,5 +1,7 @@
 # 安装与首次使用
 
+“买房小账本”的配套深度分析能力继续使用 family-freedom-planner Skill 标识和目录。只想计算房贷、首付和现金变化，可直接打开 https://bxfzzti.github.io/family-freedom-planner/ ，无需安装。
+
 本项目以 Apache-2.0 全开放提供，不设收费档位、注册或授权码；也不要求项目专属 API Key。所选 Agent 平台若收费，由其自身规则决定。家庭资料无需公开。
 
 将下面整段复制给能访问 GitHub 的 Agent。不同客户端的安装位置和生效方式不同，以实际安装结果为准。

@@ -1,364 +1,106 @@
-# 家庭重大决策规划助手 / Family Freedom Planner
+<div align="center">
+<img src="site/icon.svg" width="72" alt="买房小账本">
 
-**v1.5.0 · 免费开放 · 来源绑定 · 审查十项修复**
+# 买房小账本
 
-所有功能免费开放，以Apache-2.0许可分发。无需注册、购买授权或项目专属API密钥，不设付费档位；本地计算与测试可离线运行。宿主Agent/模型由使用者自行选择，其服务可能收费。家庭资料保持私有，不随软件公开。
+**算清首付、月供，和买房后的生活。**
 
+免费开源的买房决策工具。打开网页就能算商业贷、公积金和组合贷，比较不同首付，看看收入变化后还能留下多少现金。
 
-**别焦虑，把不可控的未来，变成可判断的条件。**
+[打开计算器](https://bxfzzti.github.io/family-freedom-planner/) · [配套 AI Skill](#让-ai-帮你做深入分析) · [安装说明](INSTALL_PROMPT.md)
 
-这是一个可分发的 Agent Skill，用于家庭重大决策：
+无需登录 · 浏览器本地计算 · Apache-2.0
+</div>
 
-- 买房、卖房、租房、置换；
-- 学区与孩子教育；
-- 一方脱产；
-- 35—45岁职业转型；
-- 高收入安全窗口下降；
-- 按揭、抵押融资、提前还贷；
-- 城市迁移和降低工作强度。
+![买房小账本网页](site/preview.jpg)
 
-它不替你预测未来，而是把未来拆成条件、现金流、Deadline 和备选方案。
+## 可以算什么
 
-## 最简单的使用方法
+| 你关心的问题 | 小账本提供什么 |
+| --- | --- |
+| 每月要还多少？ | 商业贷款、公积金贷款、组合贷；等额本息与等额本金 |
+| 首付多付10万值不值？ | 并列比较首月还款、买后现金和全期利息 |
+| 装修完手里还剩多少钱？ | 从现金扣除首付、全部交易税费、装修与家具家电 |
+| 收入下降之后呢？ | 正常、自定收入降幅、零收入三种情景的36个月现金变化 |
+| 怎么和家人一起商量？ | 下载包含输入条件、结果及假设的文本摘要 |
 
-把本仓库地址复制给你的 Agent，再把下面这句话发给它：
+首付、利率、现金底线由你填写。工具呈现取舍，不根据统一月供比例替你判断“可以买”。
+
+## 打开就能用
+
+访问 **[买房小账本](https://bxfzzti.github.io/family-freedom-planner/)**，将虚构示例替换成自己的数字。
+
+1. 填房价、首付、已经到账且可动用的现金，以及交易和装修费用。
+2. 填银行确认的贷款利率、期限、公积金额度，选择还款方式。
+3. 填买房后的税后月收入和其他月支出，比较首付与收入变化。
+
+金额字段用**万元**，利率用**年利率百分数**。其他月支出不含本次新房贷，仍需包含其他债务还款。准备提取但未到账的公积金不直接算作现金。
+
+网站适配手机浏览器；目前是网页工具，**尚未发布微信小程序**。
+
+## 数字怎么算
+
+- 等额本息使用标准月度摊还公式；等额本金逐月按剩余本金计息。组合贷分别计算后相加。
+- 买后现金 = 已到账可用现金 − 首付 − 全部交易税费 − 装修家具家电。
+- 未来现金逐月加入收入、扣除其他支出与实际月供；贷款到期后停止扣款。
+- 网页假定利率固定、其他收支固定、投资收益为0；不模拟调息、提前还款、额外大额支出和月内支付顺序。
+- 利率、额度、首付比例及税费须按实际审批和当地规则确认。示例利率不代表当前政策；现金不足会显示资金缺口。
+
+网页是独立的条件测算器，不声称执行了配套 Skill 的完整家庭规划校验。想进一步考虑置换时序、孩子上学和职业变化，可以使用下面的 Skill。
+
+## 让 AI 帮你做深入分析
+
+复杂问题可以交给配套的家庭重大决策 Skill，例如：
+
+> 想换一套离公司近的房子，但担心以后收入下降。首付应该多付一点，还是多留一点现金？
+
+复制给支持读取仓库和执行脚本的 Agent：
 
 ```text
-请安装或加载这个 GitHub 仓库里的 family-freedom-planner Agent Skill。
+请安装或加载“买房小账本”配套的 family-freedom-planner Skill：
 https://github.com/bxfzzti/family-freedom-planner
-Skill 路径是 skills/family-freedom-planner。
+技能路径：skills/family-freedom-planner
 
-如果你的环境支持 Agent Skills，请把它安装到你的 Skills 目录；
-如果不支持自动安装，就直接阅读 SKILL.md，并按需读取 references/ 和运行 scripts/。
-
-请说明是已持久安装还是仅本轮读取，以及脚本能否运行。
-根据我的一句自然语言问题识别已知事实与待验证矛盾，每轮最多问三个关键项；不要让我研究模块或填长表。
+请完整读取 SKILL.md，说明是否持久安装、是否可以执行脚本。
+复用我提供的已知信息，每轮最多补充三个关键项。
+帮我比较首付、买后现金、收入变化与生活目标，不直接套统一比例。
 ```
 
-更完整的复制话术见 [`INSTALL_PROMPT.md`](INSTALL_PROMPT.md)。
+[完整安装与验收说明](INSTALL_PROMPT.md)。本轮读取不等于已安装；外部 AI 平台可能自行收费。
 
-## v1.3 使用体验
+项目原名 Family Freedom Planner / 家庭重大决策规划助手。现在对外以“买房小账本”聚焦买房场景；仓库 URL、Skill 标识和安装目录继续保留，已有用户无需迁移。底层仍支持教育、职业、债务和养老等关联分析。
 
-- 先明确决策目的、时间和不可接受的代价，再逐步补财务缺口。
-- 收入的税前税后、个人与家庭口径不擅自转换；职业担忧不当成确定失业日期。
-- 默认一页摘要：方案条件、现金影响、生活代价、暂停线和下一步。详细测算按需展开。
-- 夫妻已有分歧时及时比较共同目标与底线；纳入保持现状、延后和可逆试行。
-- 安装后用虚构案例检查首次回复；本轮读取不等于以后自动生效。
+## 隐私与开放
 
-评估分为脚本单元测试、38个案例的结构校验、10个实际对话案例的语义评估。
-**结构校验 PASS 不代表 Agent 实际回答通过。** 实际对话的采集与审阅方法见
-[`DIALOGUE_EVAL.md`](skills/family-freedom-planner/evals/DIALOGUE_EVAL.md)；没有运行记录与审阅证据的案例标为未评估。
+网页没有账户、付费档位、广告、分析追踪、数据上传或自动持久化。刷新页面恢复虚构示例，主动下载的摘要由你保管。托管服务可能保留普通访问日志，家庭金额不发送到服务端。
 
-本轮已完成10个案例、12轮实际回答的语义审阅（同一模型、独立上下文），
-原始回答见 [对话记录](skills/family-freedom-planner/evals/results/v1.3-dialogue-recordings.json)，
-判定依据见 [审阅证据](skills/family-freedom-planner/evals/results/v1.3-dialogue-reviews.json)。
-当前审查修复及验证边界见 [v1.5说明](RELEASE_v1.5.md)。历史评测不代表当前版本行为已通过；默认评测工具会检查当前内容指纹，过期证据标STALE。
+源代码、网页计算器和 Skill 均以 [Apache-2.0](LICENSE) 开放。家庭上下文和规划文件保持私有，详见 [PRIVACY.md](PRIVACY.md)。
 
-虚构完整演示（不保存文件、不联网）：
+## 开发与验证
+
+纯静态网站，无需安装前端依赖：
 
 ```bash
-python skills/family-freedom-planner/scripts/demo_controlled_run.py
+python3 -m http.server 8765 --directory site
+# 打开 http://localhost:8765
+node --test site/tests/*.test.mjs
 ```
 
-按月现金流示例：
+配套 Python Skill 使用标准库：
 
 ```bash
-python skills/family-freedom-planner/scripts/decision_cashflow.py \
-  skills/family-freedom-planner/examples/decision_cashflow_case.json
+python3 -m unittest discover -s skills/family-freedom-planner/tests -p 'test_*.py'
+python3 skills/family-freedom-planner/scripts/check_installation.py
+python3 skills/family-freedom-planner/scripts/demo_controlled_run.py
 ```
 
-安装后自检：
-
-```bash
-python skills/family-freedom-planner/scripts/check_installation.py
-```
-
-自检 PASS 表示技能文件完整且本地计算可运行，不表示客户端已经验证自动调用。完整规划的失败复现、修复后重跑和条件化结果见
-[`v1.3.2完整规划试用`](skills/family-freedom-planner/evals/results/v1.3.2-full-plan-trial.md)。
-
-v1.3.3 增加 `agents/openai.yaml`，允许支持该元数据的 Codex 客户端自动发现。实际用
-gpt-5.5 新会话做了三轮修复验证：从未触发，到自动读取但仍跳过问诊，再到自动读取
-SKILL.md 和 intent-to-intake.md 后正确只问三个关键项。过程见
-[`跨模型自动触发记录`](skills/family-freedom-planner/evals/results/v1.3.2-cross-model-trigger-failure.md)。
-
-旧版 run.json 不直接沿用；家庭上下文可以继续使用，但需确认数据口径后重新初始化工作流。
-
-## v1.4 统一数据与自动复算
-
-v1.5进一步强制从同一decision_plan派生每个方案。住房资金闭合、贷款分段覆盖、支出归一化和全部逐月路径均为必检，不能靠自填PASS跳过。
-
-- `family_state` 固定使用人民币元、年度收支、明确税前/税后和债务还款口径。
-- 每个关键数字带来源、日期和置信度；未知值不能写成0。
-- 旧0.9上下文通过 `migrate_context.py` 迁移，合并金融资产保持待拆分。
-- 控制器自动复算基线、每个住房方案、每笔融资、教育、职业、压力情景和方案覆盖。
-- 外部提交的PASS只能补充证据，不能覆盖运行时WARN或FAIL。
-
-```bash
-python skills/family-freedom-planner/scripts/validate_family_state.py \
-  skills/family-freedom-planner/examples/sample_household.json --calculation-ready
-
-python skills/family-freedom-planner/scripts/migrate_context.py \
-  skills/family-freedom-planner/examples/family-context-old.json
-```
-
-## 仓库结构
+网页与 Skill 分别测试。Skill v1.5 的175项单元测试及10例实际对话证据见 [QA报告](QA_REPORT.json) 和 [发布验收](docs/release-verification-v1.5.md)；38个benchmark检查覆盖结构，不代表38次模型实测。网页计算测试见 [site/tests](site/tests)。
 
 ```text
-.
-├── README.md
-├── INSTALL_PROMPT.md
-├── AGENTS.md
-├── LICENSE
-└── skills/
-    └── family-freedom-planner/
-        ├── SKILL.md
-        ├── references/
-        ├── scripts/
-        ├── assets/
-        ├── examples/
-        ├── evals/
-        └── tests/
+site/                             网页、独立计算模块及测试
+skills/family-freedom-planner/    Python Skill、脚本、参考资料、示例和评测
+.github/workflows/               Python校验和网页发布
+docs/                           设计与版本验收记录
 ```
 
-`SKILL.md` 保持为薄入口；详细知识按需放在 `references/`。
-
-## 给支持 Agent Skills 的客户端
-
-技能目录：
-
-```text
-skills/family-freedom-planner
-```
-
-符合 Agent Skills 的基本结构：
-
-- `SKILL.md`：必需；
-- `scripts/`：确定性计算；
-- `references/`：按需知识；
-- `assets/`：schema；
-- `examples/`：示例；
-- `evals/` / `tests/`：回归测试。
-
-## 本地测试
-
-```bash
-python -m unittest discover -s skills/family-freedom-planner/tests -p 'test_*.py'
-```
-
-## 为什么不是 API-first
-
-这套项目首先是一份**可移植、可版本控制、可被 Agent 读懂和执行的能力包**。
-
-对个人用户，最自然的入口通常是：
-
-```text
-GitHub Repo → 给自己的 Agent → Agent 安装/读取 Skill → 开始使用
-```
-
-无需中心服务或项目账号。可以自由下载、使用、修改和按Apache-2.0再分发。
-
-## License
-
-使用 Apache-2.0。项目没有收费方案、试用期、功能锁或许可服务器。
-
-
-## v0.7.1：自适应首次问诊
-
-以下是历史版本能力记录；当前问诊预算与交互以 v1.3 的 SKILL.md 和 intent-to-intake.md 为准。模块为内部组织方式，不要求用户选择或整表填写。
-
-首次问诊不再假设所有用户都有同样的问题。
-
-使用方式：
-
-```text
-基础主干
-+
-住房 / 教育 / 职业 / 脱产 / 融资 / 父母 / 迁移 / 投资
-中选择 1—3 个模块
-```
-
-例如：
-
-- 换房：基础 + 住房
-- 学区换房：基础 + 住房 + 教育
-- 40岁职业转型：基础 + 职业
-- 买房后离职：基础 + 住房 + 职业
-- 配偶脱产 + 房贷：基础 + 脱产 + 融资
-
-Agent 应根据用户已经说出的内容自动推荐模块，而不是把全部模块都抛给用户。
-
-
-## v0.8：一句话开始
-
-用户现在可以只说：
-
-```text
-我38岁，两个孩子，想换房，但担心40岁以后工作不稳。
-```
-
-Agent 自动识别：
-
-```text
-住房 + 职业
-```
-
-如果孩子入学会直接影响换房，再自动加入：
-
-```text
-教育
-```
-
-随后生成只包含相关缺失项的个性化模板。
-
-原则：
-
-> 用户负责说问题，Agent 负责决定该问什么。
-
-
-## v0.9：不是每次都重新问诊
-
-第一次：
-
-```text
-一句话 → 个性化首次问诊 → 第一版家庭状态
-```
-
-以后：
-
-```text
-“这次变了什么？”
-→ 更新 family-context.json
-→ 只重算受影响结论
-```
-
-例如用户半年后只说：
-
-```text
-旧房现在大概只能卖335万了，
-但是我们把目标房预算从500万降到了430万，
-金融资产现在有125万。
-```
-
-Agent 不再重新询问年龄、孩子和全部收入支出，而是直接说明：
-
-- 哪几个数字变了；
-- 哪些自由度被改善/恶化；
-- 哪条旧建议需要撤销或更新。
-
-### 跨 Agent 携带
-
-用户可以把自己的 `family-context.json` 放进个人 Agent workspace 或私有 GitHub 仓库。
-
-换 Agent 时：
-
-```text
-先读取我的 family-context.json，
-再使用 family-freedom-planner 分析这次变化。
-```
-
-这样家庭规划上下文可以跟着用户走，而不是跟着某一个 App 走。
-
-
-## v1.0 Reliability
-
-这个版本不再以“功能更多”为目标，而以“面对不同家庭不套错模板”为目标。
-
-当前 benchmark：
-
-- 38 个案例
-- 30 个标准场景
-- 5 个 counterfactual
-- 3 个 invariance
-- 覆盖 10+ 风险类型
-
-运行：
-
-```bash
-python skills/family-freedom-planner/scripts/validate_benchmark.py \
-  skills/family-freedom-planner/evals/benchmark_cases.json
-```
-
-详细评估规则见：
-
-```text
-skills/family-freedom-planner/references/reliability-evals.md
-skills/family-freedom-planner/evals/RUBRIC.md
-```
-
-
-## v1.1 Execution Control
-
-v1.1 增加 Control Plane。
-
-```text
-LLM
- ↓
-workflow_orchestrator.py
- ↓
-合法下一步
- ↓
-工具 / 计算 / 外部事实
- ↓
-Validator
- ↓
-Recommendation Gate
- ↓
-Final Answer
-```
-
-### 查看合法下一步
-
-```bash
-python skills/family-freedom-planner/scripts/workflow_orchestrator.py \
-  next run.json
-```
-
-### 非法跳步
-
-会直接返回 ERROR，而不是继续执行。
-
-### Recommendation Gate
-
-只有：
-
-```text
-PASS
-或
-CONDITIONAL_PASS
-```
-
-才允许 FINALIZE。
-
-详细说明：
-
-`skills/family-freedom-planner/references/execution-control.md`
-
-
-## v1.2 Result Integrity
-
-v1.1 防止“跳步骤”。
-
-v1.2 再加一层：
-
-```text
-Step Output
-↓
-Independent Cross-check
-↓
-Source / Freshness Check
-↓
-Semantic Sanity Check
-↓
-Integrity Gate
-↓
-Recommendation Gate
-```
-
-例如：
-
-- 置换价差公式不一致 → FAIL
-- 终局房净值被错误计入可迁移资产 → FAIL
-- “无法续贷”情景却仍然填写可续额度 → FAIL
-- 教育 HIGH 情景低于 MID → FAIL
-- 外部政策未验证 → CONDITIONAL_PASS
-- 上游输入修正 → 下游结果 STALE 并定向重跑
+视觉表达参考 [Aerial 网站](https://aerial.qust.me/) 的简洁产品介绍方式。本项目页面、图标和计算器独立实现，不复用其图片或产品代码。
