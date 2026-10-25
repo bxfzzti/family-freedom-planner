@@ -9,6 +9,8 @@
 
 [打开计算器](https://bxfzzti.github.io/family-freedom-planner/) · [配套 AI Skill](#让-ai-帮你做深入分析) · [安装说明](INSTALL_PROMPT.md)
 
+[返回 bxfzzti 的个人项目集](https://bxfzzti.github.io/)
+
 无需登录 · 浏览器本地计算 · Apache-2.0
 </div>
 
