@@ -12,9 +12,13 @@ Tech stack: browser JavaScript, Node built-in test runner, existing Python unitt
 
 ## Tasks
 
-- [ ] site/calculator.mjs: 按月摊还、组合贷款与初始资金、收支压力情景。校验有限非负数、整月期限及资金闭合。负现金显示缺口。
-- [ ] site/tests/calculator.test.mjs: 用零利率、已知月供、还本恒等式、组合贷、无效数和短期限验证；与Python按揭函数交叉比较。
-- [ ] site/index.html, styles.css, app.mjs: 响应式页面；可编辑字段、结果、首付比较、情景曲线、下载测算摘要、恢复虚构示例。
-- [ ] README.md: 产品名称、网页入口、截图、用途、算法边界、Agent安装、开发与测试。保留Apache-2.0和原安装路径。
-- [ ] .github/workflows/pages.yml: 检查后上传静态站，部署Pages；仓库About说明同步买房方向。
-- [ ] 浏览器验收桌面/手机、表单修改与错误处理，Python及网页计算测试；发布后核对在线内容。
+- [x] site/calculator.mjs: 按月摊还、组合贷款与初始资金、收支压力情景。校验有限非负数、整月期限及资金闭合。负现金显示缺口。
+- [x] site/tests/calculator.test.mjs: 用零利率、已知月供、还本恒等式、组合贷、无效数和短期限验证；与Python按揭函数交叉比较。
+- [x] site/index.html, styles.css, app.mjs: 响应式页面；可编辑字段、结果、首付比较、情景曲线、下载测算摘要、恢复虚构示例。
+- [x] README.md: 产品名称、网页入口、截图、用途、算法边界、Agent安装、开发与测试。保留Apache-2.0和原安装路径。
+- [x] .github/workflows/pages.yml: 检查后上传静态站，部署Pages；仓库About说明同步买房方向。
+- [x] 浏览器验收桌面/手机、表单修改与错误处理，Python及网页计算测试；发布后核对在线内容。
+
+## 验收记录
+
+2026-10-25：8项网页算术测试、36组Python/JS月供交叉核对、175项原有Python测试通过。浏览器实测首付变化、空输入、贷款类型、还款方式、复制与下载；390px手机视口无横向溢出。公开部署运行40187009648和原有CI 40187009669通过；5个线上HTML/CSS/JS/SVG文件与本地逐字一致，HTTP 200。内置浏览器打开公开地址超时，线上视觉未再次验证；本地桌面和手机视觉已验收。
