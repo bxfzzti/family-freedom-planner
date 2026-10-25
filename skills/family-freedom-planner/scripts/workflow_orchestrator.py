@@ -40,11 +40,13 @@ def now():
 
 
 def load_json(path):
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+    from private_storage import load
+    return load(path)
 
 
 def save_json(path, data):
-    Path(path).write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    from private_storage import save
+    return save(path, data)
 
 
 def load_workflow():
@@ -179,16 +181,19 @@ def runtime_integrity_for_step(run, step_id):
         return integrity_result("housing", checks, issues)
     if step_id == "FINANCING_ANALYSIS":
         results = output.get("results", {})
+        if results.get("no_financing_needed") is True:
+            return integrity_result("financing", [{"name": "declared_no_new_financing", "pass": True}], [])
         loans = results.get("loans")
         if not loans:
             return module.validate("financing", results)
         checks, issues, ids = [], [], set()
         for loan in loans:
             oid = loan.get("option_id")
-            if not isinstance(oid, str) or not oid or oid in ids:
-                issues.append("each financing option needs a unique option_id")
+            identity = (oid, loan.get("loan_id"))
+            if not isinstance(oid, str) or not oid or identity in ids:
+                issues.append("each financing tranche needs a unique option_id/loan_id")
                 continue
-            ids.add(oid)
+            ids.add(identity)
             check = module.validate("financing", loan)
             checks.extend([{**item, "option_id": oid} for item in check["cross_checks"]])
             issues.extend([f"{oid}: {x}" for x in check["integrity"]["issues"]])
@@ -263,7 +268,19 @@ def safe_runtime_integrity_for_step(run, step_id):
         "CAREER_ANALYSIS": "career", "STRESS_TEST": "stress_test",
         "OPTIONS_VALIDATE": "options"}
     try:
-        return runtime_integrity_for_step(run, step_id)
+        result = runtime_integrity_for_step(run, step_id)
+        if "STATE_BUILD" in run["steps"] and step_id in {
+                "HOUSING_ANALYSIS", "FINANCING_ANALYSIS", "CAREER_ANALYSIS",
+                "EDUCATION_ANALYSIS", "STRESS_TEST", "OPTIONS_VALIDATE"}:
+            import plan_engine
+            checks = plan_engine.verify_output(run, step_id)
+            checks = result["cross_checks"] + checks
+            checked = integrity_result(result["domain"], checks, result["integrity"]["issues"]
+                                       if result["integrity"]["status"] == "FAIL" else [])
+            if checked["integrity"]["status"] == "PASS" and result["integrity"]["status"] == "WARN":
+                checked["integrity"] = result["integrity"]
+            return checked
+        return result
     except (ValueError, KeyError, TypeError, AttributeError, OverflowError) as exc:
         return integrity_result(domains.get(step_id, "unknown"), [],
                                 [f"runtime verification error: {exc}"])
@@ -417,6 +434,9 @@ def validate_state_build(output, run):
         return False, "invalid v1.4 family_state: " + "; ".join(result["errors"])
     if output["source_tags"] != output["family_state"]["source_tags"]:
         return False, "source_tags must match family_state.source_tags"
+    initial = run.get("context", {}).get("family_state")
+    if initial is not None and initial != output["family_state"]:
+        return False, "family_state differs from confirmed initialization; reinitialize after an explicit update"
     return True, "ok"
 
 
@@ -498,6 +518,11 @@ def validate_career(output, run):
 def validate_financing(output, run):
     if output["nominal_principal_checked"] is not True:
         return False, "nominal principal must be checked"
+    if (isinstance(output.get("results"), dict)
+            and output["results"].get("no_financing_needed") is True
+            and output["results"].get("loans") == []
+            and output["compliance_status"] == "NOT_APPLICABLE"):
+        return True, "no loans in declared plan; runtime source binding required"
     if output["refinance_failure_tested"] is not True:
         results = output.get("results")
         reason = results.get("refinance_not_applicable_reason") if isinstance(results, dict) else None
@@ -522,6 +547,14 @@ def validate_generic_domain(output, run):
 def validate_external_facts(output, run):
     if output["verification_status"] not in ("VERIFIED","PARTIAL","UNVERIFIED"):
         return False, "invalid verification_status"
+    import fact_evidence
+    state = (run.get("steps", {}).get("STATE_BUILD", {}).get("output") or {}).get("family_state", {})
+    region = state.get("housing", {}).get("region")
+    result = fact_evidence.evaluate(output, expected_region=region)
+    if output["verification_status"] == "VERIFIED" and not region:
+        return False, "confirm family_state.housing.region before marking local facts VERIFIED"
+    if output["verification_status"] == "VERIFIED" and result["status"] != "VERIFIED":
+        return False, "external evidence incomplete: " + "; ".join(result["issues"])
     if output["verification_status"] != "VERIFIED" and output["conditionalized_if_unverified"] is not True:
         return False, "unverified external facts must be conditionalized"
     return True, "ok"
@@ -557,9 +590,14 @@ def validate_options_build(output, run):
     if not isinstance(options, list) or len(options) < 2:
         return False, "need at least 2 comparable options"
     for i, option in enumerate(options):
+        if not isinstance(option, dict):
+            return False, "option must be an object"
         for key in ("id","label","tradeoffs","failure_triggers"):
             if key not in option:
                 return False, f"option[{i}] missing {key}"
+    ids = [option["id"] for option in options]
+    if not all(isinstance(oid, str) and oid for oid in ids) or len(ids) != len(set(ids)):
+        return False, "options must have unique nonempty string ids"
     return True, "ok"
 
 
@@ -783,8 +821,12 @@ def evaluate_integrity_gate(run):
     ext=run["steps"]["EXTERNAL_FACT_CHECK"]
     if ext["status"]=="COMPLETE":
         o=ext["output"]
-        if o.get("verification_status")!="VERIFIED":
+        import fact_evidence
+        region = run["steps"]["STATE_BUILD"]["output"]["family_state"].get("housing", {}).get("region")
+        evidence = fact_evidence.evaluate(o, expected_region=region)
+        if o.get("verification_status")!="VERIFIED" or evidence["status"] != "VERIFIED":
             conditional.append("external facts are not fully verified")
+            conditional.extend(evidence["issues"])
 
     if issues:
         status="BLOCKED"
@@ -901,7 +943,10 @@ def evaluate_gate(run):
     ext = run["steps"]["EXTERNAL_FACT_CHECK"]
     if ext["status"] == "COMPLETE":
         exto = ext["output"]
-        if exto.get("verification_status") != "VERIFIED":
+        import fact_evidence
+        region = run["steps"]["STATE_BUILD"]["output"]["family_state"].get("housing", {}).get("region")
+        evidence = fact_evidence.evaluate(exto, expected_region=region)
+        if exto.get("verification_status") != "VERIFIED" or evidence["status"] != "VERIFIED":
             if exto.get("conditionalized_if_unverified") is True:
                 conditional.append("external facts not fully verified; final answer must remain conditional")
             else:
@@ -1061,7 +1106,7 @@ def cli():
         elif args.cmd == "ledger":
             run = load_json(args.run_json)
             print(json.dumps(run["ledger"], ensure_ascii=False, indent=2))
-    except WorkflowError as e:
+    except (WorkflowError, ValueError, TypeError, OSError, RecursionError) as e:
         print(json.dumps({"status":"ERROR","error":str(e)}, ensure_ascii=False, indent=2))
         raise SystemExit(2)
 

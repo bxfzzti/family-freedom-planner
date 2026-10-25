@@ -4,12 +4,15 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, pinned
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5, pinned
         with:
           python-version: '3.11'
       - name: Unit tests
@@ -19,9 +22,14 @@ jobs:
         run: |
           python skills/family-freedom-planner/scripts/validate_benchmark.py \
             skills/family-freedom-planner/evals/benchmark_cases.json
-      - name: Validate recorded dialogue evidence (no model calls)
+      - name: Validate current-version dialogue evidence (no model calls)
         run: |
           python skills/family-freedom-planner/scripts/evaluate_dialogues.py \
             skills/family-freedom-planner/evals/dialogue_cases.json \
-            skills/family-freedom-planner/evals/results/v1.3-dialogue-recordings.json \
-            skills/family-freedom-planner/evals/results/v1.3-dialogue-reviews.json
+            skills/family-freedom-planner/evals/results/v1.5-dialogue-recordings.json \
+            skills/family-freedom-planner/evals/results/v1.5-dialogue-reviews.json \
+            --require-current
+      - name: Offline installation and complete workflow smoke
+        run: |
+          python skills/family-freedom-planner/scripts/check_installation.py
+          python skills/family-freedom-planner/scripts/demo_controlled_run.py

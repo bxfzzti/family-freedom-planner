@@ -18,7 +18,8 @@
       "period": "annual",
       "annual_total": 180000,
       "annual_mandatory": 150000,
-      "annual_total_includes_debt_payments": true
+      "annual_total_includes_debt_payments": true,
+      "annual_rent": 0
     },
     "assets": {
       "cash": 800000,
@@ -42,7 +43,8 @@
         {
           "id": "current_home_financing",
           "balance": 1000000,
-          "balance_basis": "CURRENT_BALANCE"
+          "balance_basis": "CURRENT_BALANCE",
+          "annual_payment": 60000
         }
       ]
     },
@@ -121,6 +123,142 @@
         "source_type": "MODEL_ASSUMPTION",
         "as_of": "2026-09",
         "confidence": "HIGH"
+      },
+      "expenses.annual_rent": {
+        "source_type": "MODEL_ASSUMPTION",
+        "as_of": "2026-10",
+        "confidence": "MEDIUM"
+      },
+      "debts.items.0.annual_payment": {
+        "source_type": "MODEL_ASSUMPTION",
+        "as_of": "2026-10",
+        "confidence": "MEDIUM"
+      }
+    },
+    "decision_plan": {
+      "horizon_months": 36,
+      "protected_reserve": 400000,
+      "options": [
+        {
+          "id": "A",
+          "kind": "HOME_PURCHASE",
+          "loans": [
+            {
+              "loan_id": "mortgage",
+              "principal": 3000000,
+              "annual_rate": 0.03,
+              "years": 30
+            }
+          ],
+          "spending_delta_annual": 0,
+          "target_home_price": 5000000,
+          "down_payment": 2000000,
+          "transaction_costs": 100000,
+          "renovation_costs": 150000,
+          "moving_costs": 0,
+          "sale": {
+            "home_id": "current_home",
+            "sale_price": 3500000,
+            "transaction_costs": 50000
+          }
+        },
+        {
+          "id": "B",
+          "kind": "HOME_PURCHASE",
+          "loans": [
+            {
+              "loan_id": "mortgage",
+              "principal": 2500000,
+              "annual_rate": 0.03,
+              "years": 30
+            }
+          ],
+          "spending_delta_annual": 0,
+          "target_home_price": 4300000,
+          "down_payment": 1800000,
+          "transaction_costs": 100000,
+          "renovation_costs": 150000,
+          "moving_costs": 0,
+          "sale": {
+            "home_id": "current_home",
+            "sale_price": 3500000,
+            "transaction_costs": 50000
+          }
+        },
+        {
+          "id": "C",
+          "kind": "HOME_PURCHASE",
+          "loans": [
+            {
+              "loan_id": "mortgage",
+              "principal": 2200000,
+              "annual_rate": 0.03,
+              "years": 30
+            }
+          ],
+          "spending_delta_annual": 0,
+          "target_home_price": 3800000,
+          "down_payment": 1600000,
+          "transaction_costs": 100000,
+          "renovation_costs": 150000,
+          "moving_costs": 0,
+          "sale": {
+            "home_id": "current_home",
+            "sale_price": 3500000,
+            "transaction_costs": 50000
+          }
+        }
+      ],
+      "scenarios": {
+        "NORMAL": {
+          "income_overrides": {},
+          "spending_delta_annual": 0,
+          "changes": [],
+          "one_off_expenses": [
+            {
+              "month": 18,
+              "amount": 100000
+            }
+          ],
+          "refinance_overrides": {},
+          "assumptions": [
+            "All figures are synthetic; zero investment return; one-off cost occurs at month 18"
+          ]
+        },
+        "STRESS": {
+          "income_overrides": {
+            "adult_a_salary": 250000
+          },
+          "spending_delta_annual": 0,
+          "changes": [],
+          "one_off_expenses": [
+            {
+              "month": 18,
+              "amount": 100000
+            }
+          ],
+          "refinance_overrides": {},
+          "assumptions": [
+            "All figures are synthetic; zero investment return; one-off cost occurs at month 18"
+          ]
+        },
+        "SEVERE": {
+          "income_overrides": {
+            "adult_a_salary": 0
+          },
+          "spending_delta_annual": 0,
+          "changes": [],
+          "one_off_expenses": [
+            {
+              "month": 18,
+              "amount": 100000
+            }
+          ],
+          "refinance_overrides": {},
+          "assumptions": [
+            "All figures are synthetic; zero investment return; one-off cost occurs at month 18"
+          ]
+        }
       }
     }
   },
@@ -199,6 +337,16 @@
       "source_type": "MODEL_ASSUMPTION",
       "as_of": "2026-09",
       "confidence": "HIGH"
+    },
+    "expenses.annual_rent": {
+      "source_type": "MODEL_ASSUMPTION",
+      "as_of": "2026-10",
+      "confidence": "MEDIUM"
+    },
+    "debts.items.0.annual_payment": {
+      "source_type": "MODEL_ASSUMPTION",
+      "as_of": "2026-10",
+      "confidence": "MEDIUM"
     }
   }
 }

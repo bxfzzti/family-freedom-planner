@@ -1,5 +1,20 @@
 # Reference Engine
 
+## v1.5 完整规划
+
+```bash
+python scripts/plan_engine.py examples/sample_household.json
+python scripts/demo_controlled_run.py
+```
+
+`decision_plan` 使用公开的 decision-plan.schema.json。共用模拟期限、储备线与正常/压力/严重情景，方案kind支持BUDGET、HOME_PURCHASE和REFINANCE。源情景通过已有收入项的income_overrides表达变化，不另填一个总收入；购房方案只填写真实房价、首付、费用、贷款分段与出售哪套现房。现金购房将loans明确设为空列表。
+
+HOME_PURCHASE需确认原年租金；出售旧房时需已知对应贷款年度还款，避免新旧月供重复扣减。REFINANCE必须引用已有debt_id、到期月、已确认续作额和续作后年度还款，严重情景必须假设续贷为0。各方案派生的原始路径必须原样进入STRESS_TEST.option_runs，不能删减。
+
+若支出未包含债务还款，需提供每笔annual_payment。引擎会加入总支出与必要支出；没有还款计划则拒绝计算。
+
+本地计算与演示免费、离线、不需要注册或API密钥。Agent只在用户选用的平台上运行，平台自身的使用条件由用户自行决定。
+
 `scripts/family_freedom_engine.py` 是标准库实现的确定性计算参考。
 
 它不预测市场，不替代政策查询。

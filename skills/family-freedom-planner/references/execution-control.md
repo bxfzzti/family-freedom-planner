@@ -1,5 +1,13 @@
 # Execution Control & Recommendation Gate
 
+## v1.5 当前完整流程
+
+先完成自然语言问诊。由Agent整理标准state和明确的decision_plan；不要求用户填写JSON。运行plan_engine.py获取派生输出，再依次完成STATE_BUILD、输入验证、时间点、baseline、适用领域、外部事实、压力路径与方案校验，最后运行完整性和推荐门禁。
+
+普通预算、按揭购房和已有债务续作对应BUDGET、HOME_PURCHASE、REFINANCE。每个方案必须有逐月路径和完整贷款分段。旧的手填现金输入即使自洽，也不能通过来源绑定。旧run需重新初始化；旧上下文先无损迁移、确认未映射字段。
+
+通过 private_storage.py 保存的run为私有文件；更改时必须重新load后保存。发生version conflict表示另一调用者已更新，需读最新状态合并后重试，不能覆盖。恢复使用 `python scripts/private_storage.py restore <run.json>`。
+
 ## v1.4 数据与门禁
 
 STATE_BUILD只接受v1.4标准family_state，外层source_tags必须与family_state.source_tags相同。BASELINE从该状态确定性生成；旧known_context输入不再接受。

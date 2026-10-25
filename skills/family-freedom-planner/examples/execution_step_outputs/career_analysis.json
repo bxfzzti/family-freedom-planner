@@ -1,21 +1,36 @@
 {
   "current_income_state": {
-    "household": 630000,
-    "high_risk": 500000
+    "period": "annual",
+    "tax_basis": "AFTER_TAX",
+    "stable_annual": {
+      "adult_a_salary": 500000,
+      "adult_b_salary": 130000,
+      "side_income": 30000
+    },
+    "high_risk_annual": 500000
   },
   "transition_scenarios": [
     {
-      "name": "current",
-      "income": 630000
+      "name": "NORMAL",
+      "income": 660000
     },
     {
-      "name": "transition",
-      "income": 280000
+      "name": "STRESS",
+      "income": 410000
     },
     {
-      "name": "severe",
-      "income": 180000
+      "name": "SEVERE",
+      "income": 160000
     }
   ],
-  "career_deadline": 2030
+  "career_deadline": {
+    "status": "SCENARIO_ONLY",
+    "horizon_months": 36
+  },
+  "integrity_inputs": {
+    "current_stable_income": 660000,
+    "reduced_main_income": 250000,
+    "new_income_sources": 0,
+    "resulting_stable_income": 410000
+  }
 }

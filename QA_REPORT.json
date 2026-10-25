@@ -1,77 +1,65 @@
 {
-  "version": "1.2.0",
-  "skill_lines": 310,
-  "unit_tests": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 785, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 720, in _warm_feature_flows\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/spreadsheet_warmup.py\", line 704, in _warm_collaboration_flows\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/generated/interface/models.py\", line 32317, in hydrate_crdt_from_proto\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/remote.py\", line 749, in __call__\n  File \"/tmp/tmp.L2TH2Y5coc/artifact_tool_v2-2.8.22/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n.........................................\n----------------------------------------------------------------------\nRan 41 tests in 0.022s\n\nOK",
+  "version": "1.5.0",
+  "recorded_at": "2026-10-25",
+  "skill_lines": 342,
+  "behavior_fingerprint": "16fa1bc7fb758288bf517baadbf3945c1ba8b1a0feafffe9b9e352dc4037cc1d",
+  "unit_tests": {
+    "count": 175,
+    "status": "PASS",
+    "command": "python3 -m unittest discover -s skills/family-freedom-planner/tests -p 'test_*.py'"
+  },
   "benchmark_validation": {
     "case_count": 38,
-    "unique_ids": 38,
-    "unique_risk_tags": 53,
-    "counterfactual_cases": 5,
-    "invariance_cases": 3,
-    "errors": [],
-    "status": "PASS"
+    "status": "PASS",
+    "scope": "case_schema_and_coverage_only",
+    "agent_responses_evaluated": false
   },
-  "integrity_positive_control": {
-    "domain": "housing",
-    "cross_checks": [
-      {
-        "name": "post_purchase_liquidity",
-        "pass": true,
-        "relative_diff": 0.0,
-        "expected": 1600000.0,
-        "actual": 1600000,
-        "tolerance": 0.005
-      },
-      {
-        "name": "replacement_spread",
-        "pass": true,
-        "relative_diff": 0.0,
-        "expected": 1500000.0,
-        "actual": 1500000,
-        "tolerance": 0.005
-      }
-    ],
-    "integrity": {
-      "status": "PASS",
-      "confidence": "HIGH",
-      "issues": []
-    }
+  "dialogue_review": {
+    "case_count": 10,
+    "answer_count": 12,
+    "status": "PASS",
+    "behavior_scope": "CURRENT",
+    "recordings": "skills/family-freedom-planner/evals/results/v1.5-dialogue-recordings.json",
+    "reviews": "skills/family-freedom-planner/evals/results/v1.5-dialogue-reviews.json",
+    "limits": "One fresh agent context independent of developer, cases grouped; root semantic review. Not cross-model or human certification."
   },
-  "integrity_negative_control": {
-    "domain": "housing",
-    "cross_checks": [
-      {
-        "name": "post_purchase_liquidity",
-        "pass": true,
-        "relative_diff": 0.0,
-        "expected": 1600000.0,
-        "actual": 1600000,
-        "tolerance": 0.005
-      },
-      {
-        "name": "replacement_spread",
-        "pass": false,
-        "relative_diff": 0.16666666666666666,
-        "expected": 1500000.0,
-        "actual": 1800000,
-        "tolerance": 0.005
-      }
-    ],
-    "integrity": {
-      "status": "FAIL",
-      "confidence": "LOW",
-      "issues": [
-        "cross-check failed: replacement_spread"
-      ]
-    }
+  "complete_plan": {
+    "status": "COMPLETE",
+    "integrity_gate": "CONDITIONAL_PASS",
+    "recommendation_gate": "CONDITIONAL_PASS",
+    "source": "synthetic sample_household decision_plan",
+    "options": 3,
+    "horizon_months": 36,
+    "evidence": "skills/family-freedom-planner/evals/results/v1.5-full-plan-trial.json"
   },
-  "dependency_invalidation_demo": [
-    "housing_freedom",
-    "options",
-    "post_purchase_liquid_assets",
-    "recommendation",
-    "replacement_spread",
-    "stress_test"
+  "installation_selfcheck": "PASS",
+  "skill_structure_validation": "PASS",
+  "historical_dialogue_negative_control": "STALE, exit 2",
+  "privacy_scan": {
+    "scope": "tracked and proposed repository files",
+    "secret_pattern_matches": 0,
+    "known_real_household_amount_matches": 0,
+    "limits": "Heuristic scan and manual diff inspection; not a guarantee against all secrets."
+  },
+  "audit_findings_fixed": [
+    "F01",
+    "F02",
+    "F03",
+    "F04",
+    "F05",
+    "F06",
+    "F07",
+    "F08",
+    "F09",
+    "F10"
   ],
+  "release_model": "free_open_source_Apache-2.0",
+  "limits": [
+    "No live policy, price, school, contract or financial fact verification.",
+    "External model/platform may charge; no project-specific billing or key.",
+    "Windows storage branch not exercised; POSIX tests run locally and in CI.",
+    "One previous-version recovery backup; no intra-month liquidity timing."
+  ],
+  "historical_report": "docs/qa-history/v1.2.json",
   "status": "PASS"
 }

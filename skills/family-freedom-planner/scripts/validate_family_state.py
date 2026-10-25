@@ -4,7 +4,9 @@ import argparse
 import json
 import math
 import re
+from datetime import date
 from pathlib import Path
+from schema_validation import validate_named
 
 VERSION = "1.4.0"
 SOURCE_TYPES = {"USER_EXACT", "USER_ESTIMATE", "EXTERNAL_PRIMARY",
@@ -37,6 +39,11 @@ def validate_source_tags(state, numeric_paths, errors):
             errors.append(f"{path} has invalid confidence")
         if not isinstance(tag.get("as_of"), str) or not DATE.match(tag["as_of"]):
             errors.append(f"{path} has invalid as_of")
+        else:
+            try:
+                date.fromisoformat(tag["as_of"] + ("-01" if len(tag["as_of"]) == 7 else ""))
+            except ValueError:
+                errors.append(f"{path} has a non-calendar as_of")
 
 
 def validate_state(state, calculation_ready=False):
@@ -44,6 +51,14 @@ def validate_state(state, calculation_ready=False):
     if not isinstance(state, dict):
         return {"status": "FAIL", "calculation_ready": False,
                 "errors": ["family state must be an object"], "warnings": []}
+    schema_errors = validate_named(state, "family-state.schema.json")
+    if schema_errors:
+        return {"status": "FAIL", "calculation_ready": False,
+                "errors": schema_errors, "warnings": []}
+    try:
+        date.fromisoformat(state["as_of"] + ("-01" if len(state["as_of"]) == 7 else ""))
+    except ValueError:
+        errors.append("as_of is not a calendar date")
     if state.get("schema_version") != VERSION:
         errors.append(f"schema_version must be {VERSION}")
     if state.get("currency") != "CNY" or state.get("amount_unit") != "yuan":
@@ -85,6 +100,8 @@ def validate_state(state, calculation_ready=False):
     number(expenses.get("annual_mandatory"), "expenses.annual_mandatory", errors, nullable=True)
     if expenses.get("annual_mandatory") is not None:
         numeric_paths.append("expenses.annual_mandatory")
+    if expenses.get("annual_rent") is not None:
+        numeric_paths.append("expenses.annual_rent")
     if expenses.get("annual_total_includes_debt_payments") not in (True, False, None):
         errors.append("annual_total_includes_debt_payments must be boolean or null")
 
@@ -126,6 +143,9 @@ def validate_state(state, calculation_ready=False):
         number(item.get("balance"), path, errors, nullable=True)
         if item.get("balance") is not None:
             numeric_paths.append(path)
+        if item.get("annual_payment") is not None:
+            number(item["annual_payment"], f"debts.items.{index}.annual_payment", errors)
+            numeric_paths.append(f"debts.items.{index}.annual_payment")
         if item.get("balance_basis") not in {"CURRENT_BALANCE", "ORIGINAL_PRINCIPAL", "UNKNOWN"}:
             errors.append(f"debts.items.{index}.balance_basis is invalid")
     debt_ids = [item.get("id") for item in items]
@@ -142,6 +162,9 @@ def validate_state(state, calculation_ready=False):
     for index, home in enumerate(homes):
         linked_id = home.get("linked_debt_id")
         linked_balance = home.get("linked_debt_balance")
+        if linked_id in debt_by_id and linked_balance is not None:
+            if debt_by_id[linked_id].get("balance") != linked_balance:
+                errors.append(f"assets.real_estate.{index}.linked debt balance conflicts with debts.items")
         if linked_balance not in (None, 0, 0.0):
             if linked_id not in debt_by_id:
                 errors.append(f"assets.real_estate.{index}.linked_debt_id is unresolved")
@@ -149,6 +172,9 @@ def validate_state(state, calculation_ready=False):
                 errors.append(f"assets.real_estate.{index}.linked debt balance conflicts with debts.items")
         elif linked_id is not None and linked_id not in debt_by_id:
             errors.append(f"assets.real_estate.{index}.linked_debt_id is unresolved")
+    linked_ids = [home["linked_debt_id"] for home in homes if home["linked_debt_id"] is not None]
+    if len(linked_ids) != len(set(linked_ids)):
+        errors.append("shared property debt requires explicit allocation before this model can calculate equity")
 
     validate_source_tags(state, numeric_paths, errors)
     if calculation_ready:
@@ -160,6 +186,9 @@ def validate_state(state, calculation_ready=False):
             errors.append("calculation requires annual_total")
         if type(expenses.get("annual_total_includes_debt_payments")) is not bool:
             errors.append("calculation requires debt-payment inclusion basis")
+        if expenses.get("annual_total_includes_debt_payments") is False:
+            if any(item.get("annual_payment") is None for item in items):
+                errors.append("expenses exclude debt payments: every debt needs annual_payment")
         for key in ("cash", "low_risk_investments", "investments",
                     "other_liquid", "other_non_liquid"):
             if assets.get(key) is None:
@@ -188,9 +217,23 @@ def main():
     parser.add_argument("state")
     parser.add_argument("--calculation-ready", action="store_true")
     args = parser.parse_args()
-    data = json.loads(Path(args.state).read_text(encoding="utf-8"))
-    state = data.get("family_state") if isinstance(data, dict) and "family_state" in data else data
-    result = validate_state(state, args.calculation_ready)
+    try:
+        data = json.loads(Path(args.state).read_text(encoding="utf-8"))
+        state = data.get("family_state") if isinstance(data, dict) and "family_state" in data else data
+        envelope_errors = (validate_named(data, "family-context.schema.json")
+                           if isinstance(data, dict) and "family_state" in data else [])
+        result = validate_state(state, args.calculation_ready)
+        if envelope_errors:
+            result.update(status="FAIL", calculation_ready=False,
+                          errors=envelope_errors + result["errors"])
+        if (args.calculation_ready and isinstance(data, dict)
+                and data.get("migration") and
+                (not isinstance(data["migration"], dict) or data["migration"].get("resolved") is not True)):
+            result.update(status="FAIL", calculation_ready=False,
+                          errors=result["errors"] + ["resolve and confirm legacy migration before calculation"])
+    except (ValueError, TypeError, OSError, OverflowError, RecursionError) as exc:
+        result = {"status": "FAIL", "calculation_ready": False,
+                  "errors": [f"cannot read state: {exc}"], "warnings": []}
     print(json.dumps(result, ensure_ascii=False, indent=2))
     raise SystemExit(0 if result["status"] == "PASS" else 2)
 

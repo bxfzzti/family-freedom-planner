@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Family Freedom Planner deterministic reference engine v0.7.
+"""Family Freedom Planner deterministic reference engine v1.5.
 
 Standard-library only. Amounts are in yuan. Rates are decimals (3% = 0.03).
 This module performs arithmetic; it does not predict markets or policy.
@@ -83,6 +83,10 @@ def baseline(state: dict) -> dict:
     mandatory = n(expenses.get("annual_mandatory"), annual_spend)
     if mandatory > annual_spend:
         raise ValueError("mandatory spending cannot exceed total spending")
+    if expenses["annual_total_includes_debt_payments"] is False:
+        debt_payments = sum(n(item["annual_payment"]) for item in debt_items)
+        annual_spend += debt_payments
+        mandatory += debt_payments
 
     cash = n(assets.get("cash"))
     low_risk = n(assets.get("low_risk_investments"))

@@ -84,7 +84,7 @@ class EngineTests(unittest.TestCase):
 
     def test_unknown_risk_income_is_not_zero_dependency(self):
         state = json.loads((ROOT / "examples" / "sample_household.json").read_text())
-        state["income"].pop("high_risk_annual")
+        state["income"]["high_risk_annual"] = None
         self.assertIsNone(engine.baseline(state)["high_income_dependency"])
 
     def test_before_tax_state_cannot_be_calculated(self):

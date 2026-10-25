@@ -1,14 +1,49 @@
 {
-  "mode": "SELL_RENT_THEN_UPGRADE",
+  "mode": "SOURCE_BOUND_PLAN",
   "results": {
     "target_home_considered": true,
     "replacement_spread_checked": true,
-    "current_spread": 1500000,
-    "sell_rent_wait_cost": 44000,
-    "breakeven_old_home_decline_pct": 0.0126
+    "post_purchase_liquid_assets": 1000000,
+    "options": [
+      {
+        "option_id": "A",
+        "pre_purchase_liquid_assets": 800000,
+        "cash_outlay": 2250000,
+        "sale_net_inflow": 2450000,
+        "post_purchase_liquid_assets": 1000000,
+        "old_home_price": 3500000,
+        "target_home_price": 5000000,
+        "replacement_spread": 1500000,
+        "down_payment": 2000000,
+        "total_loan_principal": 3000000
+      },
+      {
+        "option_id": "B",
+        "pre_purchase_liquid_assets": 800000,
+        "cash_outlay": 2050000,
+        "sale_net_inflow": 2450000,
+        "post_purchase_liquid_assets": 1200000,
+        "old_home_price": 3500000,
+        "target_home_price": 4300000,
+        "replacement_spread": 800000,
+        "down_payment": 1800000,
+        "total_loan_principal": 2500000
+      },
+      {
+        "option_id": "C",
+        "pre_purchase_liquid_assets": 800000,
+        "cash_outlay": 1850000,
+        "sale_net_inflow": 2450000,
+        "post_purchase_liquid_assets": 1400000,
+        "old_home_price": 3500000,
+        "target_home_price": 3800000,
+        "replacement_spread": 300000,
+        "down_payment": 1600000,
+        "total_loan_principal": 2200000
+      }
+    ]
   },
   "assumptions": [
-    "target_home_budget=5000000",
-    "rent=6750/month"
+    "All fiscal inputs derive from confirmed decision_plan"
   ]
 }

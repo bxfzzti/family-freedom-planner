@@ -1,0 +1,32 @@
+{
+  "run": {
+    "model": "inherited session model; exact backend ID not exposed",
+    "origin": "agent_run",
+    "recorded_at": "2026-10-25T00:02:36Z",
+    "skill_revision": "v1.5.0 pre-release working tree",
+    "behavior_fingerprint": "16fa1bc7fb758288bf517baadbf3945c1ba8b1a0feafffe9b9e352dc4037cc1d",
+    "execution_disclosure": "10个案例在一个独立于root的子agent新上下文中分组执行；每个案例按独立用户会话处理，但并未为每个案例分别创建独立上下文。同一案例的后续轮次保留前文。这不是跨模型试用。",
+    "case_context_isolation": "grouped_in_one_agent_context",
+    "cross_model": false,
+    "reference_answers_read": false,
+    "mapping_read_after_responses": true
+  },
+  "full_plan": [
+    "这是基于仓库虚构家庭的条件测算，不能用于真实家庭直接下单。当前年收入66万元、年支出18万元，年结余48万元；金融资产100万元中，80万元进入低风险现金路径，20万元波动资产未用于填补缺口。旧房假设卖350万元，清偿100万元贷款和5万元卖房费用后，净回款245万元。\n\n若三个方案都能满足同样的居住目标，C保留的财务余地最大，B居中，A对未来收入和置换价差更敏感。样例没有给出具体生活目标和决定期限，因此财务排序还不能替代住房选择。\n\n| 项目 | A：500万元房屋 | B：430万元房屋 | C：380万元房屋 |\n|---|---:|---:|---:|\n| 置换价差 | 150万元 | 80万元 | 30万元 |\n| 首付及买入费用 | 225万元 | 205万元 | 185万元 |\n| 新贷款 | 300万元 | 250万元 | 220万元 |\n| 买后低风险资产，未扣储备 | 100万元 | 120万元 | 140万元 |\n| 月供 | 12,648元 | 10,540元 | 9,275元 |\n| 正常年结余 | 38.82万元 | 41.35万元 | 42.87万元 |\n| 压力年结余 | 13.82万元 | 16.35万元 | 17.87万元 |\n| 严重情景年缺口 | 11.18万元 | 8.65万元 | 7.13万元 |\n| 严重情景第36个月低风险资产 | 56.47万元 | 84.06万元 | 108.61万元 |\n\n正常、压力、严重情景分别假设主收入为50万、25万、0万元，其余年收入合计16万元不变；三种路径均含第18个月一次性支出10万元，投资收益按0。基础情景的36个月内，三个方案均未跌破示例设定的40万元储备线，但这不代表长期安全，严重情景仍持续消耗资产。\n\n四组房价配对也已计算。在贷款本金保持原值、首付随目标价调整的假设下，旧房跌10%而目标房只跌2%，或旧房不变而目标房涨5%，A的严重情景第36个月余额均降至31.47万元，低于40万元示例储备线；这两种情况应触发重算和调整方案。它们是情景，不是房价预测。\n\n实际完整性门禁和推荐门禁均为CONDITIONAL_PASS，流程最终状态为COMPLETE。贷款按年利率3%、30年全额摊还假设，无续贷和到期大额本金；真实合同、可贷额度、成交价及交易费用尚未核验。执行前应先确认生活目标与期限，再核对交易和贷款条件，条件变化后重算。"
+  ],
+  "execution_report": [
+    "直接完整读取的文件，均位于 /Users/xxqq/Documents/Codex/2026-09-08/referenced-chatgpt-conversation-this-is-an/work/family-freedom-planner-v1.2.xol7hL ：AGENTS.md；skills/family-freedom-planner/SKILL.md；该技能references目录下的intent-to-intake.md、decision-framing.md、output-contract.md、stateful-replan.md、execution-control.md、couple-mode.md、core-model.md、engine-reference.md、intake.md、housing.md、financing.md、career.md、result-integrity.md、freedom-model.md；assets/family-state.schema.json、assets/family-context.schema.json；examples/sample_household.json；scripts/validate_family_state.py、scripts/demo_controlled_run.py。另检索workflow_orchestrator.py函数定义，并读取next_steps函数。",
+    "运行时加载的仓库代码包括scripts/plan_engine.py、workflow_orchestrator.py、family_freedom_engine.py、decision_cashflow.py、integrity_engine.py、validate_family_state.py、schema_validation.py、fact_evidence.py、private_storage.py；运行时读取assets/workflow.compiled.json、family-state.schema.json、decision-plan.schema.json及examples/sample_household.json。未调用private_storage保存功能。",
+    "实际计算：案例3使用Python计算60万减24万为36万，45万减24万为21万，结余修正为减少15万；没有把这三项减法当成完整家庭baseline。案例9未重新测算。案例10在内存中运行上下文schema和家庭状态验证，普通验证PASS，calculation-ready检查FAIL，未执行家庭财务测算。",
+    "完整规划实际从sample_household.json中的单一decision_plan派生所有方案，运行基线、住房、按揭、职业情景、三方案各36个月NORMAL/STRESS/SEVERE路径、方案覆盖和运行时复算；第二次完整执行时，每个手动步骤提交前均调用next_steps核对合法性。BASELINE_CALCULATE、HOUSING_ANALYSIS、FINANCING_ANALYSIS、CAREER_ANALYSIS、STRESS_TEST、OPTIONS_VALIDATE的运行时完整性均PASS；INTEGRITY_GATE和RECOMMENDATION_GATE均CONDITIONAL_PASS；FINALIZE为COMPLETE。教育、父母、迁移、投资领域由控制器按未选主题自动跳过，没有据此断言真实家庭不存在这些问题。",
+    "另对旧房/目标房变化分别为-10%/-10%、-10%/-2%、0/+5%、+5%/+5%的四组虚构状态实际运行plan_engine；每个状态从自身decision_plan重新派生，保留原贷款本金并让首付随目标价调整。这四组属于补充敏感性计算，没有分别再运行完整门禁。",
+    "限制：全部使用虚构资料；未读取tests、evals或docs；未联网、未调用外部付费API；没有修改仓库或保存家庭文件，计算及流程状态均留在内存，关闭字节码写入。未验证当前房价、税费、政策、学区、贷款合同或合规事实。40万元储备、收入路径、3%利率及交易费用均为示例假设；36个月结果不代表更长时期，按月净现金流不检查月内支付先后。读取本轮技能不代表已持久安装，也不代表其他新会话自动生效。"
+  ],
+  "recording_followup": {
+    "disclosure": "full_plan和execution_report均为上一轮最终回复原文，未改写；其中未读evals、未保存文件等叙述描述原试用当时的状态。本次仅在原回答完成后读取dialogue_cases.json的ID及user_turns映射，并按新增授权保存这两份证据文件。未读取参考答案。",
+    "observed_integrity_gate": "CONDITIONAL_PASS",
+    "observed_recommendation_gate": "CONDITIONAL_PASS",
+    "observed_final_status": "COMPLETE"
+  }
+}
+

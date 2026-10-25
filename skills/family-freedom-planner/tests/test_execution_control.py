@@ -2,7 +2,7 @@ import importlib.util
 import json
 import unittest
 from pathlib import Path
-from workflow_fixtures import baseline_output, state_build, stress_scenarios
+from workflow_fixtures import baseline_output, state_build, stress_scenarios, stress_output
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "workflow_orchestrator.py"
@@ -233,10 +233,7 @@ class ExecutionControlTests(unittest.TestCase):
                 "verification_status":"VERIFIED" if external_verified else "UNVERIFIED",
                 "conditionalized_if_unverified":False if external_verified else True
             })
-        wo.complete_step(run, "STRESS_TEST", {
-            "scenarios":stress_scenarios(),
-            "material_failures":[]
-        })
+        wo.complete_step(run, "STRESS_TEST", stress_output())
         wo.complete_step(run, "OPTIONS_BUILD", {
             "options":[
                 {"id":"A","label":"A","tradeoffs":[],"failure_triggers":[]},

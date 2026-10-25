@@ -1,6 +1,6 @@
 # GENERATED FROM workflow.compiled.json
-# spec_hash: ca9f1cbd4ad34a234cbfa92bdd30d6f767988f91b0a26caea426389fa768f4c9
-version: 1.4.0
+# spec_hash: 904ae18b65a5240697fa9ebe383f54e8beb03eef631e7b2fbab6392b05ec24c9
+version: 1.5.0
 name: family-freedom-planner-execution-control
 principle: fail_closed
 gate_statuses:

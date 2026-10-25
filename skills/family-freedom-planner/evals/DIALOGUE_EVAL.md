@@ -1,5 +1,10 @@
 # 实际对话评估
 
+v1.5默认同时核对当前行为指纹。recordings.run.behavior_fingerprint须为
+`python scripts/behavior_fingerprint.py` 的实际输出；它包含SKILL、引用、脚本、Schema和工作流，不包含测试答案或报告。行为文件变化后旧评测标为STALE并返回非零，不能继续声称当前通过。
+
+只审阅旧记录时显式使用 `--historical`，报告会标注HISTORICAL_EVIDENCE_ONLY。普通CI不自动调用付费模型；发布者在独立会话实际采集当前回答并逐项审阅后再更新证据。
+
 三个不同层次必须分别报告：
 
 1. unittest：确定性脚本与控制逻辑。
@@ -9,6 +14,8 @@
 ## 采集
 
 使用 dialogue_cases.json。每个案例开一个干净对话，给被测 Agent 读取当前 SKILL.md 的能力，但不把 criteria 或参考答案给它。逐条发送 user_turns，收集实际回答，不修改回答来满足规则。记录模型、Skill commit、日期和运行来源。不要在普通 CI 中自动调用付费模型。
+
+v1.5发布记录采用一个独立于开发上下文的Agent集中完成10例，未读取criteria或参考答案；这弱于每例全新上下文，可能存在案例间影响，已在run.limits披露，不能称为跨模型或完全隔离的泛化证明。完整规划另保存实际运行报告。
 
 recordings.json 格式：
 

@@ -1,5 +1,15 @@
 # Result Integrity, Cross-Validation & Rollback
 
+## v1.5 来源绑定是完整规划的前提
+
+由Agent整理统一的 `family_state.decision_plan`；用户只需确认真实数字、约束和假设，不必填写结构化表。运行 `python scripts/plan_engine.py <state.json>` 获取可提交的步骤输出。
+
+控制器会独立从同一来源派生预期值：购房价=首付+全部按揭分段；买后现金=原始可用现金+净售房款-首付及全部费用；收入变化和支出变化来自同一个情景定义。每个方案均须有逐月路径，所有方案ID和贷款分段须完整对应。结果自洽但输入来源不同仍FAIL。
+
+运行时不会证明原始事实一定真实，因此首次问诊必须保留事实、估算和假设区别。禁止用虚构state替用户确认未知债务、税收或现金。
+
+财政恒等式的数值容差为0.01元，不再把数千元误差当作0.5%可接受偏差。资产估值不确定性应放入不同情景，不是放宽同一情景的资金恒等式。
+
 ## v1.4 全步骤自动复算
 
 INTEGRITY_GATE自动从当前step output生成运行时完整性结果，覆盖baseline、housing、financing、education、career、stress_test和options。调用者可以提交额外交叉证据，但系统取外部与运行时中的较弱状态。

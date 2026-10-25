@@ -1,6 +1,8 @@
 # 家庭重大决策规划助手 / Family Freedom Planner
 
-**v1.4.0 · 统一家庭状态 · 全步骤自动复算**
+**v1.5.0 · 免费开放 · 来源绑定 · 审查十项修复**
+
+所有功能免费开放，以Apache-2.0许可分发。无需注册、购买授权或项目专属API密钥，不设付费档位；本地计算与测试可离线运行。宿主Agent/模型由使用者自行选择，其服务可能收费。家庭资料保持私有，不随软件公开。
 
 
 **别焦虑，把不可控的未来，变成可判断的条件。**
@@ -50,7 +52,7 @@ Skill 路径是 skills/family-freedom-planner。
 本轮已完成10个案例、12轮实际回答的语义审阅（同一模型、独立上下文），
 原始回答见 [对话记录](skills/family-freedom-planner/evals/results/v1.3-dialogue-recordings.json)，
 判定依据见 [审阅证据](skills/family-freedom-planner/evals/results/v1.3-dialogue-reviews.json)。
-v1.4完整改动、148项脚本测试及验证边界见 [v1.4说明](RELEASE_v1.4.md)。
+当前审查修复及验证边界见 [v1.5说明](RELEASE_v1.5.md)。历史评测不代表当前版本行为已通过；默认评测工具会检查当前内容指纹，过期证据标STALE。
 
 虚构完整演示（不保存文件、不联网）：
 
@@ -82,6 +84,8 @@ SKILL.md 和 intent-to-intake.md 后正确只问三个关键项。过程见
 旧版 run.json 不直接沿用；家庭上下文可以继续使用，但需确认数据口径后重新初始化工作流。
 
 ## v1.4 统一数据与自动复算
+
+v1.5进一步强制从同一decision_plan派生每个方案。住房资金闭合、贷款分段覆盖、支出归一化和全部逐月路径均为必检，不能靠自填PASS跳过。
 
 - `family_state` 固定使用人民币元、年度收支、明确税前/税后和债务还款口径。
 - 每个关键数字带来源、日期和置信度；未知值不能写成0。
@@ -151,11 +155,11 @@ python -m unittest discover -s skills/family-freedom-planner/tests -p 'test_*.py
 GitHub Repo → 给自己的 Agent → Agent 安装/读取 Skill → 开始使用
 ```
 
-API 可以以后作为企业集成选项，而不是使用本项目的前提。
+无需中心服务或项目账号。可以自由下载、使用、修改和按Apache-2.0再分发。
 
 ## License
 
-当前开发包默认使用 Apache-2.0，便于公开分发与二次集成。正式发布前可按项目商业策略调整。
+使用 Apache-2.0。项目没有收费方案、试用期、功能锁或许可服务器。
 
 
 ## v0.7.1：自适应首次问诊

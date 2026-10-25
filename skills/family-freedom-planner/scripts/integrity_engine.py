@@ -31,6 +31,13 @@ def check_close(name, a, b, tolerance=0.005):
     }
 
 
+def check_money(name, actual, expected):
+    difference = abs(float(actual) - float(expected))
+    return {"name": name, "pass": difference <= .01,
+            "absolute_diff": difference, "expected": expected, "actual": actual,
+            "absolute_tolerance_yuan": .01}
+
+
 def mortgage_payment_independent(principal, annual_rate, years):
     principal=float(principal); annual_rate=float(annual_rate); years=float(years)
     n=int(round(years*12))
@@ -68,13 +75,13 @@ def validate_housing(data):
     after=data.get("post_purchase_liquid_assets")
     if None not in (before,cash_out,after):
         expected=float(before)-float(cash_out)+float(sale_in)
-        checks.append(check_close("post_purchase_liquidity",after,expected,0.005))
+        checks.append(check_money("post_purchase_liquidity", after, expected))
 
     old=data.get("old_home_price")
     target=data.get("target_home_price")
     spread=data.get("replacement_spread")
     if None not in (old,target,spread):
-        checks.append(check_close("replacement_spread",spread,float(target)-float(old),0.005))
+        checks.append(check_money("replacement_spread", spread, float(target)-float(old)))
 
     if data.get("final_home_non_sellable") and data.get("final_home_equity_counted_as_portable"):
         issues.append("non-sellable final-home equity cannot be counted as portable assets")
@@ -108,7 +115,7 @@ def validate_financing(data):
     safe=float(data.get("safely_available_for_debt",0) or 0)
     gap=float(data.get("refinance_gap",0) or 0)
     expected=max(0,balance-refi-safe)
-    checks.append(check_close("refinance_gap_identity",gap,expected,0.005))
+    checks.append(check_money("refinance_gap_identity", gap, expected))
 
     if data.get("scenario")=="NO_REFINANCE" and refi != 0:
         issues.append("NO_REFINANCE scenario requires confirmed_refinance_amount=0")
@@ -144,7 +151,7 @@ def validate_career(data):
     resulting=data.get("resulting_stable_income")
     if None not in (current,reduced,resulting):
         theoretical=float(current)-float(reduced)+float(new_sources)
-        checks.append(check_close("career_income_identity", resulting, theoretical, 0.005))
+        checks.append(check_money("career_income_identity", resulting, theoretical))
     else:
         issues.append("career integrity inputs are incomplete")
     return checks, issues

@@ -1,7 +1,7 @@
 import importlib.util
 import unittest
 from pathlib import Path
-from workflow_fixtures import baseline_output, state_build, stress_scenarios
+from workflow_fixtures import baseline_output, state_build, stress_scenarios, stress_output
 
 ROOT=Path(__file__).resolve().parents[1]
 P=ROOT/"scripts"/"workflow_orchestrator.py"
@@ -89,10 +89,7 @@ class IntegrityGateTests(unittest.TestCase):
         wo.complete_step(run,"INPUT_VALIDATE",{"status":"READY","missing_p0":[],"conflicts":[]})
         wo.complete_step(run,"DEADLINE_IDENTIFY",{"deadlines":[],"deadline_collision":False})
         wo.complete_step(run,"BASELINE_CALCULATE",baseline_output())
-        wo.complete_step(run,"STRESS_TEST",{
-            "scenarios":stress_scenarios(),
-            "material_failures":[]
-        })
+        wo.complete_step(run,"STRESS_TEST",stress_output())
         wo.complete_step(run,"OPTIONS_BUILD",{
             "options":[
                 {"id":"A","label":"A","tradeoffs":[],"failure_triggers":[]},

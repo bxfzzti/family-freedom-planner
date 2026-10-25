@@ -22,3 +22,10 @@ recordings.json
 reviews.json
 run.json
 private/
+*.previous
+*.lock
+*.run.json
+.ffp-*.tmp
+/family-context*.json
+/recordings*.json
+/reviews*.json

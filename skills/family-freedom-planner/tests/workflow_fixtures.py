@@ -4,7 +4,27 @@ from pathlib import Path
 
 def family_state():
     root = Path(__file__).resolve().parents[1]
-    return json.loads((root / "examples" / "sample_household.json").read_text())
+    state = json.loads((root / "examples" / "sample_household.json").read_text())
+    state["decision_plan"] = {
+        "horizon_months": 36, "protected_reserve": 200000,
+        "options": [{"id": oid, "kind": "BUDGET", "loans": [],
+                     "spending_delta_annual": delta} for oid, delta in (("A", 0), ("B", -20000))],
+        "scenarios": {name: {
+            "income_overrides": overrides, "spending_delta_annual": 0,
+            "changes": [], "one_off_expenses": [], "refinance_overrides": {},
+            "assumptions": ["Synthetic source-bound test"]}
+            for name, overrides in (("NORMAL", {}), ("STRESS", {"adult_a_salary": 250000}),
+                                     ("SEVERE", {"adult_a_salary": 0}))}}
+    return state
+
+
+def plan_outputs():
+    import plan_engine
+    return plan_engine.step_outputs(family_state())
+
+
+def stress_output():
+    return plan_outputs()["STRESS_TEST"]
 
 
 def state_build():

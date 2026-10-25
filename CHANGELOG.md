@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.5.0 — Open & Source-bound Planning
+
+- 全开放 Apache-2.0：不设付费档位、注册、授权码或项目专属密钥。
+- 修复债务还款漏计、旧上下文非住房债务丢失、Schema与运行时校验漂移。
+- 方案从单一 decision_plan 派生，核对购房资金闭合、分笔贷款、方案覆盖及完整月度路径；拒绝换入无关资金。
+- 外部事实须有来源、地区及有效期；未核实条件保持条件性，门禁重算新鲜度。
+- 金额勾稽使用分级精度；家庭文件私有权限、原子写、版本冲突保护和单版本恢复。
+- 当前行为指纹绑定真实对话证据；历史证据不能冒充当前通过。CI最小权限并固定Actions版本。
+
+
 ## v1.2.0 — Result Integrity
 
 - 新增 Result Envelope、provenance、cross-check。

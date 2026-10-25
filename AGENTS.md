@@ -2,6 +2,16 @@
 
 This repository contains a portable Agent Skill.
 
+The software is free and openly distributed under Apache-2.0. Do not introduce
+accounts, subscriptions, paywalls, license checks, or mandatory provider/API keys.
+Keep household documents private.
+
+For complete planning in v1.5, derive all fiscal outputs with plan_engine.py from
+the single confirmed family_state.decision_plan. Never recreate cashflow inputs
+independently. Missing source data blocks recommendations rather than becoming 0.
+Tests and scripts run offline without paid model calls. Current behavior evidence
+must match behavior_fingerprint.py; historical evidence is not current validation.
+
 If asked to use, install, review, or test the Family Freedom Planner:
 
 1. Read `skills/family-freedom-planner/SKILL.md`.

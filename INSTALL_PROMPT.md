@@ -1,5 +1,7 @@
 # 安装与首次使用
 
+本项目以 Apache-2.0 全开放提供，不设收费档位、注册或授权码；也不要求项目专属 API Key。所选 Agent 平台若收费，由其自身规则决定。家庭资料无需公开。
+
 将下面整段复制给能访问 GitHub 的 Agent。不同客户端的安装位置和生效方式不同，以实际安装结果为准。
 
 ```text
@@ -39,7 +41,7 @@ https://github.com/bxfzzti/family-freedom-planner
 
 家庭资料默认留在用户指定的私人位置，不随 Skill 提交到公开仓库。
 
-## v1.4 旧上下文升级
+## v1.5 旧上下文升级
 
 旧的 `schema_version: 0.9` 文件先运行：
 
@@ -53,4 +55,6 @@ python scripts/migrate_context.py family-context.json
 python scripts/validate_family_state.py family-context-v1.4.json --calculation-ready
 ```
 
-未通过 calculation-ready 时继续问诊，不得把未知值改成0后强行计算。v1.3及更早的 run.json 不能继续执行，需要从确认后的家庭状态重新初始化。
+未通过 calculation-ready 时继续问诊，不得把未知值改成0后强行计算。迁移保留原始上下文和非住房负债，未确认事项必须保留。v1.4及更早的 run.json 需从确认后的家庭状态重新初始化；完整规划还需填好 decision_plan，由 plan_engine.py 派生全部方案和月度情景。
+
+规划文件由私有存储模块以0600权限原子保存，保留一份.previous恢复副本，并拒绝过期版本覆盖。备份也含家庭资料，请留在私人目录，不提交公开仓库。

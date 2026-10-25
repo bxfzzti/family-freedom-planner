@@ -26,7 +26,7 @@ class DialogueEvaluationTests(unittest.TestCase):
                                      "reason": "明确要求确认税收口径"}}}]}
 
     def status(self):
-        return E.evaluate(self.suite, self.runs, self.review)["status"]
+        return E.evaluate(self.suite, self.runs, self.review, expected_fingerprint=None)["status"]
 
     def test_complete_review(self):
         self.assertEqual(self.status(), "PASS")

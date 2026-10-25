@@ -10,6 +10,8 @@ import hashlib
 import json
 from pathlib import Path
 
+CURRENT_BEHAVIOR = object()
+
 
 def digest(value):
     return hashlib.sha256(
@@ -32,7 +34,10 @@ def indexed(rows, label):
     return result
 
 
-def evaluate(suite, recordings, reviews):
+def evaluate(suite, recordings, reviews, expected_fingerprint=CURRENT_BEHAVIOR):
+    if expected_fingerprint is CURRENT_BEHAVIOR:
+        from behavior_fingerprint import current
+        expected_fingerprint = current()
     cases = indexed(suite["cases"], "cases")
     if not cases:
         raise ValueError("empty case suite")
@@ -109,9 +114,13 @@ def evaluate(suite, recordings, reviews):
     status = ("FAIL" if any(r["status"] == "FAIL" for r in results)
               else "INCOMPLETE" if any(r["status"] == "INCOMPLETE" for r in results)
               else "PASS")
+    stale = expected_fingerprint is not None and meta.get("behavior_fingerprint") != expected_fingerprint
+    if stale and status != "FAIL":
+        status = "STALE"
     return {"status": status, "evaluation_scope": "reviewed_recorded_dialogues",
             "origin": meta.get("origin"), "run": meta,
-            "case_count": len(cases), "results": results,
+            "case_count": len(cases), "results": results, "stale_behavior": stale,
+            "behavior_scope": "CURRENT" if expected_fingerprint is not None else "HISTORICAL_EVIDENCE_ONLY",
             "limits": "Checks review completeness and evidence binding; does not independently verify semantic judgments."}
 
 
@@ -120,15 +129,27 @@ def main():
     parser.add_argument("suite")
     parser.add_argument("recordings")
     parser.add_argument("reviews")
+    parser.add_argument("--require-current", action="store_true",
+                        help="Reject historical evidence not bound to this installed behavior")
+    parser.add_argument("--historical", action="store_true",
+                        help="Only audit historical evidence, not current behavior")
     args = parser.parse_args()
     try:
+        if args.historical and args.require_current:
+            raise ValueError("choose historical evidence or current behavior")
+        if not args.historical:
+            from behavior_fingerprint import current
+            expected = current()
+        else:
+            expected = None
         result = evaluate(*(json.loads(Path(p).read_text(encoding="utf-8"))
-                            for p in (args.suite, args.recordings, args.reviews)))
+                            for p in (args.suite, args.recordings, args.reviews)),
+                          expected_fingerprint=expected)
     except (ValueError, KeyError, TypeError, OSError) as exc:
         print(json.dumps({"status": "ERROR", "error": str(exc)}, ensure_ascii=False))
         raise SystemExit(2)
     print(json.dumps(result, ensure_ascii=False, indent=2))
-    raise SystemExit({"PASS": 0, "FAIL": 1, "INCOMPLETE": 2}[result["status"]])
+    raise SystemExit({"PASS": 0, "FAIL": 1, "INCOMPLETE": 2, "STALE": 2}[result["status"]])
 
 
 if __name__ == "__main__":

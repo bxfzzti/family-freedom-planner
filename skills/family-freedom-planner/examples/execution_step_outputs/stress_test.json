@@ -1,28 +1,274 @@
 {
   "scenarios": {
     "NORMAL": {
-      "summary": "income and financing assumptions hold",
-      "income_annual": 630000,
-      "spending_annual": 180000,
-      "annual_net_cashflow": 450000,
-      "assumptions": ["Synthetic example: current income remains unchanged"]
+      "income_annual": 660000,
+      "spending_annual": 271777.4521426021,
+      "annual_net_cashflow": 388222.5478573979,
+      "assumptions": [
+        "All figures are synthetic; zero investment return; one-off cost occurs at month 18"
+      ]
     },
     "STRESS": {
-      "summary": "income down, housing spread worsens",
-      "income_annual": 380000,
-      "spending_annual": 180000,
-      "annual_net_cashflow": 200000,
-      "assumptions": ["Synthetic example: main income declines by 250000"]
+      "income_annual": 410000,
+      "spending_annual": 271777.4521426021,
+      "annual_net_cashflow": 138222.54785739788,
+      "assumptions": [
+        "All figures are synthetic; zero investment return; one-off cost occurs at month 18"
+      ]
     },
     "SEVERE": {
-      "summary": "high income ends early",
-      "income_annual": 130000,
-      "spending_annual": 180000,
-      "annual_net_cashflow": -50000,
-      "assumptions": ["Synthetic example: main income becomes zero"]
+      "income_annual": 160000,
+      "spending_annual": 271777.4521426021,
+      "annual_net_cashflow": -111777.45214260212,
+      "assumptions": [
+        "All figures are synthetic; zero investment return; one-off cost occurs at month 18"
+      ]
     }
   },
-  "material_failures": [
-    "target-school eligibility must be verified before execution"
-  ]
+  "option_runs": [
+    {
+      "option_id": "A",
+      "input": {
+        "initial_low_risk_assets": 800000,
+        "upfront_net_inflow": 2450000,
+        "upfront_outflow": 2250000,
+        "protected_reserve": 400000,
+        "horizon_months": 36,
+        "scenarios": {
+          "NORMAL": {
+            "income_annual": 660000,
+            "spending_annual": 271777.4521426021,
+            "changes": [],
+            "one_off_expenses": [
+              {
+                "month": 18,
+                "amount": 100000
+              }
+            ]
+          },
+          "STRESS": {
+            "income_annual": 410000,
+            "spending_annual": 271777.4521426021,
+            "changes": [],
+            "one_off_expenses": [
+              {
+                "month": 18,
+                "amount": 100000
+              }
+            ]
+          },
+          "SEVERE": {
+            "income_annual": 160000,
+            "spending_annual": 271777.4521426021,
+            "changes": [],
+            "one_off_expenses": [
+              {
+                "month": 18,
+                "amount": 100000
+              }
+            ]
+          }
+        }
+      },
+      "result": {
+        "post_decision_low_risk_assets": 1000000,
+        "protected_reserve": 400000,
+        "horizon_months": 36,
+        "scenarios": {
+          "NORMAL": {
+            "ending_low_risk_assets": 2064667.64,
+            "minimum_low_risk_assets": 1000000,
+            "first_reserve_breach_month": null,
+            "first_cash_shortfall_month": null,
+            "maximum_reserve_gap": 0,
+            "maximum_cash_shortfall": 0,
+            "final_annual_net_cashflow": 388222.5478573979
+          },
+          "STRESS": {
+            "ending_low_risk_assets": 1314667.64,
+            "minimum_low_risk_assets": 1000000,
+            "first_reserve_breach_month": null,
+            "first_cash_shortfall_month": null,
+            "maximum_reserve_gap": 0,
+            "maximum_cash_shortfall": 0,
+            "final_annual_net_cashflow": 138222.54785739788
+          },
+          "SEVERE": {
+            "ending_low_risk_assets": 564667.64,
+            "minimum_low_risk_assets": 564667.64,
+            "first_reserve_breach_month": null,
+            "first_cash_shortfall_month": null,
+            "maximum_reserve_gap": 0,
+            "maximum_cash_shortfall": 0,
+            "final_annual_net_cashflow": -111777.45214260212
+          }
+        },
+        "basis": "monthly_net_cashflow_zero_investment_return",
+        "limits": "No intra-month timing; no-breach means only within this horizon. Reserve is a user input or explicit assumption, not a universal safety standard."
+      }
+    },
+    {
+      "option_id": "B",
+      "input": {
+        "initial_low_risk_assets": 800000,
+        "upfront_net_inflow": 2450000,
+        "upfront_outflow": 2050000,
+        "protected_reserve": 400000,
+        "horizon_months": 36,
+        "scenarios": {
+          "NORMAL": {
+            "income_annual": 660000,
+            "spending_annual": 246481.2101188351,
+            "changes": [],
+            "one_off_expenses": [
+              {
+                "month": 18,
+                "amount": 100000
+              }
+            ]
+          },
+          "STRESS": {
+            "income_annual": 410000,
+            "spending_annual": 246481.2101188351,
+            "changes": [],
+            "one_off_expenses": [
+              {
+                "month": 18,
+                "amount": 100000
+              }
+            ]
+          },
+          "SEVERE": {
+            "income_annual": 160000,
+            "spending_annual": 246481.2101188351,
+            "changes": [],
+            "one_off_expenses": [
+              {
+                "month": 18,
+                "amount": 100000
+              }
+            ]
+          }
+        }
+      },
+      "result": {
+        "post_decision_low_risk_assets": 1200000,
+        "protected_reserve": 400000,
+        "horizon_months": 36,
+        "scenarios": {
+          "NORMAL": {
+            "ending_low_risk_assets": 2340556.37,
+            "minimum_low_risk_assets": 1200000,
+            "first_reserve_breach_month": null,
+            "first_cash_shortfall_month": null,
+            "maximum_reserve_gap": 0,
+            "maximum_cash_shortfall": 0,
+            "final_annual_net_cashflow": 413518.7898811649
+          },
+          "STRESS": {
+            "ending_low_risk_assets": 1590556.37,
+            "minimum_low_risk_assets": 1200000,
+            "first_reserve_breach_month": null,
+            "first_cash_shortfall_month": null,
+            "maximum_reserve_gap": 0,
+            "maximum_cash_shortfall": 0,
+            "final_annual_net_cashflow": 163518.7898811649
+          },
+          "SEVERE": {
+            "ending_low_risk_assets": 840556.37,
+            "minimum_low_risk_assets": 840556.37,
+            "first_reserve_breach_month": null,
+            "first_cash_shortfall_month": null,
+            "maximum_reserve_gap": 0,
+            "maximum_cash_shortfall": 0,
+            "final_annual_net_cashflow": -86481.2101188351
+          }
+        },
+        "basis": "monthly_net_cashflow_zero_investment_return",
+        "limits": "No intra-month timing; no-breach means only within this horizon. Reserve is a user input or explicit assumption, not a universal safety standard."
+      }
+    },
+    {
+      "option_id": "C",
+      "input": {
+        "initial_low_risk_assets": 800000,
+        "upfront_net_inflow": 2450000,
+        "upfront_outflow": 1850000,
+        "protected_reserve": 400000,
+        "horizon_months": 36,
+        "scenarios": {
+          "NORMAL": {
+            "income_annual": 660000,
+            "spending_annual": 231303.4649045749,
+            "changes": [],
+            "one_off_expenses": [
+              {
+                "month": 18,
+                "amount": 100000
+              }
+            ]
+          },
+          "STRESS": {
+            "income_annual": 410000,
+            "spending_annual": 231303.4649045749,
+            "changes": [],
+            "one_off_expenses": [
+              {
+                "month": 18,
+                "amount": 100000
+              }
+            ]
+          },
+          "SEVERE": {
+            "income_annual": 160000,
+            "spending_annual": 231303.4649045749,
+            "changes": [],
+            "one_off_expenses": [
+              {
+                "month": 18,
+                "amount": 100000
+              }
+            ]
+          }
+        }
+      },
+      "result": {
+        "post_decision_low_risk_assets": 1400000,
+        "protected_reserve": 400000,
+        "horizon_months": 36,
+        "scenarios": {
+          "NORMAL": {
+            "ending_low_risk_assets": 2586089.61,
+            "minimum_low_risk_assets": 1400000,
+            "first_reserve_breach_month": null,
+            "first_cash_shortfall_month": null,
+            "maximum_reserve_gap": 0,
+            "maximum_cash_shortfall": 0,
+            "final_annual_net_cashflow": 428696.5350954251
+          },
+          "STRESS": {
+            "ending_low_risk_assets": 1836089.61,
+            "minimum_low_risk_assets": 1400000,
+            "first_reserve_breach_month": null,
+            "first_cash_shortfall_month": null,
+            "maximum_reserve_gap": 0,
+            "maximum_cash_shortfall": 0,
+            "final_annual_net_cashflow": 178696.5350954251
+          },
+          "SEVERE": {
+            "ending_low_risk_assets": 1086089.61,
+            "minimum_low_risk_assets": 1086089.61,
+            "first_reserve_breach_month": null,
+            "first_cash_shortfall_month": null,
+            "maximum_reserve_gap": 0,
+            "maximum_cash_shortfall": 0,
+            "final_annual_net_cashflow": -71303.46490457491
+          }
+        },
+        "basis": "monthly_net_cashflow_zero_investment_return",
+        "limits": "No intra-month timing; no-breach means only within this horizon. Reserve is a user input or explicit assumption, not a universal safety standard."
+      }
+    }
+  ],
+  "material_failures": []
 }
